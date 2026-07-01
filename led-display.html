@@ -1,0 +1,483 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Galaxy Gate – LED Display</title>
+  <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Rajdhani:wght@300;400;600&display=swap" rel="stylesheet">
+
+  <style>
+    /* ============================================================
+       DESIGN TOKENS
+    ============================================================ */
+    :root {
+      --void:    #000814;
+      --cyan:    #00f5ff;
+      --nebula:  #7b2fff;
+      --violet:  #b44fff;
+      --solar:   #ff6b35;
+      --amber:   #ffb703;
+      --white:   #ffffff;
+      --font-display: 'Orbitron', monospace;
+      --font-body:    'Rajdhani', sans-serif;
+    }
+
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    html, body {
+      width: 100%; height: 100%;
+      overflow: hidden;
+      background: var(--void);
+      font-family: var(--font-display);
+      color: var(--white);
+    }
+
+    /* ─── Main canvas (takes up the whole screen) ─── */
+    #led-canvas {
+      position: fixed;
+      inset: 0;
+      width: 100%;
+      height: 100%;
+    }
+
+    /* ─── Logo overlay ─── */
+    #logo-wrap {
+      position: fixed;
+      inset: 0;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      pointer-events: none;
+      z-index: 10;
+      opacity: 0;
+      transition: opacity 0.8s ease;
+    }
+    #logo-wrap.visible { opacity: 1; }
+
+    .logo-title {
+      font-size: clamp(40px, 7vw, 90px);
+      font-weight: 900;
+      letter-spacing: 0.15em;
+      text-align: center;
+      color: var(--white);
+      text-shadow:
+        0 0 30px var(--cyan),
+        0 0 80px rgba(0,245,255,0.5),
+        0 0 160px rgba(0,245,255,0.2);
+      animation: logo-throb 2.2s ease-in-out infinite;
+    }
+    .logo-sub {
+      font-family: var(--font-body);
+      font-size: clamp(14px, 2vw, 22px);
+      letter-spacing: 0.6em;
+      color: var(--cyan);
+      opacity: 0.75;
+      margin-top: 16px;
+      text-align: center;
+    }
+    @keyframes logo-throb {
+      0%, 100% { text-shadow: 0 0 30px var(--cyan), 0 0 80px rgba(0,245,255,0.5); }
+      50%       { text-shadow: 0 0 60px var(--cyan), 0 0 140px rgba(0,245,255,0.7), 0 0 220px rgba(0,245,255,0.3); }
+    }
+
+    /* ─── WebSocket status badge ─── */
+    #ws-badge {
+      position: fixed;
+      top: 18px; right: 24px;
+      z-index: 100;
+      font-family: var(--font-display);
+      font-size: 9px;
+      letter-spacing: 0.35em;
+      color: rgba(255,255,255,0.4);
+      display: flex;
+      align-items: center;
+      gap: 7px;
+    }
+    #ws-dot {
+      width: 6px; height: 6px;
+      border-radius: 50%;
+      background: #444;
+      transition: background 0.3s;
+    }
+    #ws-dot.on  { background: #00ff88; box-shadow: 0 0 6px #00ff88; }
+    #ws-dot.off { background: #ff4455; }
+
+    /* ─── Trigger hint (shown in idle state) ─── */
+    #idle-hint {
+      position: fixed;
+      bottom: 28px;
+      left: 50%;
+      transform: translateX(-50%);
+      font-family: var(--font-display);
+      font-size: 9px;
+      letter-spacing: 0.4em;
+      color: rgba(0,245,255,0.25);
+      z-index: 20;
+      transition: opacity 0.5s;
+    }
+  </style>
+</head>
+<body>
+
+  <canvas id="led-canvas"></canvas>
+
+  <!-- Logo shown after scan completes -->
+  <div id="logo-wrap">
+    <div class="logo-title" id="logo-text">GALAXY GATE</div>
+    <div class="logo-sub">IDENTITY CONFIRMED</div>
+  </div>
+
+  <!-- WS status -->
+  <div id="ws-badge">
+    <div id="ws-dot" class="off"></div>
+    <span id="ws-label">WAITING FOR CONNECTION</span>
+  </div>
+
+  <!-- Idle state hint -->
+  <p id="idle-hint">AWAITING SCAN SIGNAL · LED DISPLAY ONLINE</p>
+
+  <script>
+  /* ============================================================
+     ⚙️  CONFIG
+     🔌  แก้ IP/port ให้ตรงกับ websocket-server.js
+  ============================================================ */
+  const CONFIG = {
+    WS_URL:       'ws://localhost:3001',   // WebSocket server address
+    LOGO_TEXT:    'GALAXY GATE',           // 🔌 เปลี่ยนเป็นชื่องาน/โลโก้ของคุณ
+    LOGO_SUB:     'IDENTITY CONFIRMED',    // 🔌 ข้อความรอง
+    EFFECT_DUR:   8000,                    // ms ของ effect sequence
+    IDLE_AFTER:   6000,                    // ms ก่อนกลับ idle
+  };
+
+  /* ============================================================
+     CANVAS SETUP
+  ============================================================ */
+  const canvas  = document.getElementById('led-canvas');
+  const ctx     = canvas.getContext('2d');
+  let W = canvas.width  = innerWidth;
+  let H = canvas.height = innerHeight;
+  let cx = W / 2, cy = H / 2;
+
+  window.addEventListener('resize', () => {
+    W = canvas.width  = innerWidth;
+    H = canvas.height = innerHeight;
+    cx = W / 2; cy = H / 2;
+  });
+
+  /* ============================================================
+     LED EFFECT PHASES
+     idle → activate → portal → burst → wave → logo → settle → idle
+  ============================================================ */
+  let phase = 'idle';
+  let phaseStart = 0;
+  const effects = {
+    particles: [],
+    rings:     [],
+    beams:     [],
+    stars:     [],
+  };
+
+  // Persistent ambient stars
+  const ambientStars = Array.from({ length: 260 }, () => ({
+    x: Math.random() * 3840, y: Math.random() * 2160,
+    r: Math.random() * 1.8 + 0.3,
+    phase: Math.random() * Math.PI * 2,
+    spd: Math.random() * 0.006 + 0.002,
+    base: Math.random() * 0.55 + 0.15,
+  }));
+
+  /* ─── Trigger the full LED show ─── */
+  function triggerLEDShow() {
+    phase = 'activate';
+    phaseStart = Date.now();
+    effects.particles = [];
+    effects.rings = [];
+    effects.beams = [];
+
+    // 1. Screen flash
+    schedulePortal(300);
+    scheduleBurst(700);
+    scheduleStarExplosion(1200);
+    scheduleWaveRings(1800);
+    showLogo(2800);
+    scheduleIdle(CONFIG.IDLE_AFTER);
+    hideLogo(CONFIG.IDLE_AFTER - 1000);
+  }
+
+  function schedulePortal(delay) {
+    setTimeout(() => {
+      for (let i = 0; i < 4; i++) {
+        effects.rings.push({
+          x: cx, y: cy,
+          r: 0,
+          maxR: Math.max(W, H) * 0.85,
+          life: 1,
+          color: i % 2 === 0 ? [0, 245, 255] : [123, 47, 255],
+          width: 4 - i * 0.5,
+          speed: 8 + i * 3,
+          delay: i * 120,
+          born: Date.now() + i * 120,
+        });
+      }
+    }, delay);
+  }
+
+  function scheduleBurst(delay) {
+    setTimeout(() => {
+      const COUNT = 80;
+      for (let i = 0; i < COUNT; i++) {
+        const angle = (i / COUNT) * Math.PI * 2 + Math.random() * 0.3;
+        const spd   = Math.random() * 12 + 5;
+        const hue   = Math.random() > 0.5 ? 188 : 270;
+        effects.beams.push({
+          x: cx, y: cy,
+          vx: Math.cos(angle) * spd,
+          vy: Math.sin(angle) * spd,
+          len: Math.random() * 80 + 40,
+          life: 1,
+          decay: Math.random() * 0.008 + 0.005,
+          color: hue === 188 ? [0, 245, 255] : [180, 79, 255],
+          w: Math.random() * 2.5 + 0.8,
+        });
+      }
+    }, delay);
+  }
+
+  function scheduleStarExplosion(delay) {
+    setTimeout(() => {
+      for (let i = 0; i < 120; i++) {
+        const angle = Math.random() * Math.PI * 2;
+        const spd   = Math.random() * 10 + 3;
+        effects.particles.push({
+          x: cx + (Math.random() - 0.5) * 200,
+          y: cy + (Math.random() - 0.5) * 200,
+          vx: Math.cos(angle) * spd,
+          vy: Math.sin(angle) * spd,
+          life: 1,
+          decay: Math.random() * 0.01 + 0.005,
+          r: Math.random() * 5 + 2,
+          hue: [188, 270, 30, 280][Math.floor(Math.random() * 4)],
+        });
+      }
+    }, delay);
+  }
+
+  function scheduleWaveRings(delay) {
+    for (let i = 0; i < 5; i++) {
+      setTimeout(() => {
+        effects.rings.push({
+          x: cx, y: cy,
+          r: 20,
+          maxR: Math.max(W, H),
+          life: 1,
+          color: [0, 245, 255],
+          width: 3,
+          speed: 4,
+          delay: 0,
+          born: Date.now(),
+        });
+      }, delay + i * 250);
+    }
+  }
+
+  function showLogo(delay) {
+    setTimeout(() => {
+      document.getElementById('logo-wrap').classList.add('visible');
+    }, delay);
+  }
+
+  function hideLogo(delay) {
+    setTimeout(() => {
+      document.getElementById('logo-wrap').classList.remove('visible');
+    }, delay);
+  }
+
+  function scheduleIdle(delay) {
+    setTimeout(() => {
+      phase = 'idle';
+      effects.particles = [];
+      effects.rings = [];
+      effects.beams = [];
+    }, delay);
+  }
+
+  /* ============================================================
+     DRAW LOOP
+  ============================================================ */
+  let flashAlpha = 0;
+  let flashTimer = null;
+
+  function flash() {
+    flashAlpha = 1.0;
+    if (flashTimer) clearInterval(flashTimer);
+    flashTimer = setInterval(() => {
+      flashAlpha = Math.max(0, flashAlpha - 0.06);
+      if (flashAlpha <= 0) clearInterval(flashTimer);
+    }, 16);
+  }
+
+  (function drawLoop() {
+    ctx.clearRect(0, 0, W, H);
+    const now = Date.now();
+
+    /* Background */
+    ctx.fillStyle = '#000814';
+    ctx.fillRect(0, 0, W, H);
+
+    /* Ambient nebula glow */
+    if (phase === 'idle') {
+      const idleGlow = ctx.createRadialGradient(W*0.2, H*0.8, 0, W*0.2, H*0.8, W*0.4);
+      idleGlow.addColorStop(0, 'rgba(123,47,255,0.07)');
+      idleGlow.addColorStop(1, 'transparent');
+      ctx.fillStyle = idleGlow;
+      ctx.fillRect(0, 0, W, H);
+
+      const idleGlow2 = ctx.createRadialGradient(W*0.8, H*0.2, 0, W*0.8, H*0.2, W*0.4);
+      idleGlow2.addColorStop(0, 'rgba(0,200,255,0.06)');
+      idleGlow2.addColorStop(1, 'transparent');
+      ctx.fillStyle = idleGlow2;
+      ctx.fillRect(0, 0, W, H);
+    } else {
+      /* Active nebula – stronger glow */
+      const g1 = ctx.createRadialGradient(cx, cy, 0, cx, cy, W * 0.6);
+      g1.addColorStop(0, 'rgba(0,245,255,0.06)');
+      g1.addColorStop(0.5, 'rgba(123,47,255,0.04)');
+      g1.addColorStop(1, 'transparent');
+      ctx.fillStyle = g1;
+      ctx.fillRect(0, 0, W, H);
+    }
+
+    /* Stars */
+    const t = now / 1000;
+    ambientStars.forEach(s => {
+      const sx = (s.x % W + W) % W;
+      const sy = (s.y % H + H) % H;
+      const a  = s.base * (0.4 + 0.6 * Math.abs(Math.sin(t * s.spd * 12 + s.phase)));
+      ctx.beginPath();
+      ctx.arc(sx, sy, s.r, 0, Math.PI * 2);
+      ctx.fillStyle = `rgba(255,255,255,${a})`;
+      ctx.fill();
+    });
+
+    /* ── Expanding rings ── */
+    for (let i = effects.rings.length - 1; i >= 0; i--) {
+      const rn = effects.rings[i];
+      if (now < rn.born) continue;
+      rn.r += rn.speed;
+      rn.life = Math.max(0, 1 - rn.r / rn.maxR);
+      if (rn.life <= 0) { effects.rings.splice(i, 1); continue; }
+      const [r, g, b] = rn.color;
+      ctx.beginPath();
+      ctx.arc(rn.x, rn.y, rn.r, 0, Math.PI * 2);
+      ctx.strokeStyle = `rgba(${r},${g},${b},${rn.life * 0.85})`;
+      ctx.lineWidth = rn.width;
+      ctx.shadowBlur = 22; ctx.shadowColor = `rgb(${r},${g},${b})`;
+      ctx.stroke();
+      ctx.shadowBlur = 0;
+    }
+
+    /* ── Radial beams ── */
+    for (let i = effects.beams.length - 1; i >= 0; i--) {
+      const bm = effects.beams[i];
+      bm.x += bm.vx; bm.y += bm.vy;
+      bm.vx *= 0.97; bm.vy *= 0.97;
+      bm.life -= bm.decay;
+      if (bm.life <= 0) { effects.beams.splice(i, 1); continue; }
+      const [r,g,b] = bm.color;
+      const tailX = bm.x - bm.vx * bm.len * bm.life;
+      const tailY = bm.y - bm.vy * bm.len * bm.life;
+      const bg = ctx.createLinearGradient(tailX, tailY, bm.x, bm.y);
+      bg.addColorStop(0, 'transparent');
+      bg.addColorStop(1, `rgba(${r},${g},${b},${bm.life})`);
+      ctx.beginPath();
+      ctx.moveTo(tailX, tailY); ctx.lineTo(bm.x, bm.y);
+      ctx.strokeStyle = bg;
+      ctx.lineWidth = bm.w;
+      ctx.stroke();
+    }
+
+    /* ── Explosion particles ── */
+    for (let i = effects.particles.length - 1; i >= 0; i--) {
+      const p = effects.particles[i];
+      p.x += p.vx; p.y += p.vy;
+      p.vx *= 0.97; p.vy *= 0.97;
+      p.life -= p.decay;
+      if (p.life <= 0) { effects.particles.splice(i, 1); continue; }
+      ctx.beginPath();
+      ctx.arc(p.x, p.y, p.r * p.life, 0, Math.PI * 2);
+      ctx.fillStyle = `hsla(${p.hue},100%,70%,${p.life * 0.85})`;
+      ctx.shadowBlur = 12; ctx.shadowColor = `hsl(${p.hue},100%,70%)`;
+      ctx.fill();
+      ctx.shadowBlur = 0;
+    }
+
+    /* ── Flash overlay ── */
+    if (flashAlpha > 0) {
+      ctx.fillStyle = `rgba(0,245,255,${flashAlpha * 0.45})`;
+      ctx.fillRect(0, 0, W, H);
+    }
+
+    requestAnimationFrame(drawLoop);
+  })();
+
+  /* ============================================================
+     🔌  WEBSOCKET LISTENER
+     Receives { type: 'SCAN_COMPLETE' } from the server
+  ============================================================ */
+  function initWS() {
+    let ws;
+    try {
+      ws = new WebSocket(CONFIG.WS_URL);
+
+      ws.onopen = () => {
+        setWSDot(true, 'CONNECTED TO SERVER');
+        ws.send(JSON.stringify({ type: 'REGISTER', role: 'led_display' }));
+      };
+
+      ws.onclose = () => {
+        setWSDot(false, 'RECONNECTING...');
+        setTimeout(initWS, 4000);
+      };
+
+      ws.onerror = () => {};
+
+      ws.onmessage = (event) => {
+        try {
+          const msg = JSON.parse(event.data);
+          console.log('[LED] Received:', msg);
+
+          /* ─── 🔌 Main trigger ─── */
+          if (msg.type === 'SCAN_COMPLETE') {
+            flash();
+            triggerLEDShow();
+          }
+        } catch (e) {
+          console.warn('[LED] Bad message:', event.data);
+        }
+      };
+    } catch (e) {
+      setWSDot(false, 'OFFLINE');
+    }
+  }
+
+  function setWSDot(on, txt) {
+    document.getElementById('ws-dot').className = on ? 'on' : 'off';
+    document.getElementById('ws-label').textContent = txt;
+  }
+
+  /* ─── Keyboard shortcut for testing (press Space) ─── */
+  window.addEventListener('keydown', e => {
+    if (e.code === 'Space') { flash(); triggerLEDShow(); }
+  });
+
+  /* ─── Update logo text from config ─── */
+  document.getElementById('logo-text').textContent = CONFIG.LOGO_TEXT;
+  document.querySelector('.logo-sub').textContent   = CONFIG.LOGO_SUB;
+
+  /* ─── Boot ─── */
+  initWS();
+  console.log('[LED DISPLAY] Booted. Press SPACE to test effect.');
+  </script>
+</body>
+</html>
