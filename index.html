@@ -7,7 +7,7 @@
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
   <title>Galaxy Gate – Space Scan</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Rajdhani:wght@300;400;600;700&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Rajdhani:wght@300;400;600;700&family=Kanit:wght@500;600;700&display=swap" rel="stylesheet">
  
   <style>
     /* ============================================================
@@ -214,7 +214,88 @@
     .corner.tr { top: 36px; right: 36px; border-width: 2px 2px 0 0; }
     .corner.bl { bottom: 36px; left: 36px; border-width: 0 0 2px 2px; }
     .corner.br { bottom: 36px; right: 36px; border-width: 0 2px 2px 0; }
- 
+
+    /* Ambient side decorations – เติมเอฟเฟคข้างจอไม่ให้โล่ง */
+    .start-deco {
+      position: absolute;
+      inset: 0;
+      z-index: 0;
+      pointer-events: none;
+      overflow: hidden;
+    }
+    /* ดาวเคราะห์ลอยเรือง ๆ ที่ขอบจอ */
+    .deco-planet {
+      position: absolute;
+      border-radius: 50%;
+      opacity: 0.9;
+    }
+    .deco-planet-left {
+      width: 300px; height: 300px;
+      left: -120px; bottom: -70px;
+      background: radial-gradient(circle at 35% 30%, rgba(0,245,255,0.32), rgba(123,47,255,0.16) 55%, transparent 72%);
+      box-shadow: 0 0 90px rgba(0,200,255,0.22);
+      animation: deco-float 9s ease-in-out infinite;
+    }
+    .deco-planet-left::after {
+      content: '';
+      position: absolute;
+      inset: -26% -8%;
+      border-radius: 50%;
+      border: 1px solid rgba(0,245,255,0.22);
+      transform: rotate(-24deg) scaleY(0.34);
+    }
+    .deco-planet-right {
+      width: 170px; height: 170px;
+      right: -55px; top: 9%;
+      background: radial-gradient(circle at 60% 35%, rgba(255,183,3,0.26), rgba(180,79,255,0.15) 55%, transparent 72%);
+      box-shadow: 0 0 70px rgba(180,79,255,0.2);
+      animation: deco-float 11s ease-in-out infinite reverse;
+    }
+    /* ออร์บลอยเล็ก ๆ กระจายข้างจอ */
+    .deco-orb {
+      position: absolute;
+      width: 6px; height: 6px;
+      border-radius: 50%;
+      background: var(--cyan);
+      box-shadow: 0 0 12px var(--cyan);
+      opacity: 0.7;
+    }
+    .deco-orb-1 { left: 12%; top: 26%; animation: deco-drift 7s ease-in-out infinite; }
+    .deco-orb-2 { left: 8%;  top: 62%; width: 4px; height: 4px; background: var(--violet); box-shadow: 0 0 10px var(--violet); animation: deco-drift 9s ease-in-out infinite 0.6s; }
+    .deco-orb-3 { right: 14%; top: 42%; animation: deco-drift 8s ease-in-out infinite 1.1s; }
+    .deco-orb-4 { right: 10%; bottom: 24%; width: 5px; height: 5px; background: var(--amber); box-shadow: 0 0 10px var(--amber); animation: deco-drift 10s ease-in-out infinite 0.3s; }
+    @keyframes deco-float {
+      0%, 100% { transform: translateY(0); }
+      50%       { transform: translateY(-22px); }
+    }
+    @keyframes deco-drift {
+      0%, 100% { transform: translate(0, 0);    opacity: 0.7; }
+      50%       { transform: translate(0, -16px); opacity: 0.3; }
+    }
+    /* ขีด HUD ข้างซ้าย-ขวา */
+    .deco-hud {
+      position: absolute;
+      top: 50%;
+      transform: translateY(-50%);
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+    .deco-hud-left  { left: 30px;  align-items: flex-start; }
+    .deco-hud-right { right: 30px; align-items: flex-end; }
+    .deco-hud span {
+      height: 2px;
+      background: rgba(0,245,255,0.3);
+      animation: deco-hud-pulse 2.4s ease-in-out infinite;
+    }
+    .deco-hud span:nth-child(1) { width: 26px; }
+    .deco-hud span:nth-child(2) { width: 44px; animation-delay: 0.3s; }
+    .deco-hud span:nth-child(3) { width: 18px; animation-delay: 0.6s; }
+    @keyframes deco-hud-pulse {
+      0%, 100% { opacity: 0.25; }
+      50%       { opacity: 0.7; }
+    }
+
     /* ============================================================
        SCREEN 2 – WARP TRANSITION
        ============================================================ */
@@ -313,6 +394,7 @@
       justify-content: center;
       cursor: pointer;
       overflow: hidden;
+      box-shadow: inset 0 0 44px rgba(0,245,255,0.05), 0 0 26px rgba(0,245,255,0.08);
       transition: border-color 0.3s, box-shadow 0.3s;
     }
     .hand-pad:active,
@@ -320,6 +402,45 @@
       border-color: rgba(0,245,255,0.7);
       box-shadow: 0 0 40px rgba(0,245,255,0.2), inset 0 0 40px rgba(0,245,255,0.06);
     }
+
+    /* มุมกรอบเล็งภายในแผ่นสแกน */
+    .pad-corner {
+      position: absolute;
+      width: 26px; height: 26px;
+      border: 2px solid rgba(0,245,255,0.55);
+      filter: drop-shadow(0 0 6px rgba(0,245,255,0.5));
+      animation: pad-corner-pulse 2.4s ease-in-out infinite;
+      pointer-events: none;
+    }
+    .pad-corner.tl { top: 14px; left: 14px;  border-width: 2px 0 0 2px; border-radius: 6px 0 0 0; }
+    .pad-corner.tr { top: 14px; right: 14px; border-width: 2px 2px 0 0; border-radius: 0 6px 0 0; }
+    .pad-corner.bl { bottom: 14px; left: 14px;  border-width: 0 0 2px 2px; border-radius: 0 0 0 6px; }
+    .pad-corner.br { bottom: 14px; right: 14px; border-width: 0 2px 2px 0; border-radius: 0 0 6px 0; }
+    @keyframes pad-corner-pulse {
+      0%, 100% { opacity: 0.4; }
+      50%       { opacity: 1; }
+    }
+
+    /* วงเป้าเล็งหมุนช้า ๆ รอบมือ */
+    .hand-reticle {
+      position: absolute;
+      inset: 0;
+      margin: auto;
+      width: 168px; height: 168px;
+      border-radius: 50%;
+      border: 1.5px dashed rgba(0,245,255,0.4);
+      box-shadow: inset 0 0 30px rgba(0,245,255,0.12);
+      animation: reticle-spin 16s linear infinite;
+      pointer-events: none;
+    }
+    .hand-reticle::before {
+      content: '';
+      position: absolute;
+      inset: 20px;
+      border-radius: 50%;
+      border: 1px solid rgba(123,47,255,0.35);
+    }
+    @keyframes reticle-spin { to { transform: rotate(360deg); } }
  
     /* Sheen on the pad */
     .hand-pad::before {
@@ -392,6 +513,49 @@
         var(--void);
       z-index: 25;
     }
+    #screen-scanning::before,
+    #screen-scanning::after {
+      content: '';
+      position: absolute;
+      inset: -20%;
+      pointer-events: none;
+      opacity: 0;
+    }
+    #screen-scanning.active::before {
+      background:
+        conic-gradient(from 90deg at 50% 45%,
+          transparent 0deg,
+          rgba(0,245,255,0.22) 48deg,
+          transparent 96deg,
+          rgba(123,47,255,0.18) 168deg,
+          transparent 240deg,
+          rgba(255,183,3,0.12) 308deg,
+          transparent 360deg);
+      animation: scan-field-spin 5.2s linear infinite;
+      opacity: 0.45;
+      filter: blur(18px);
+    }
+    #screen-scanning.active::after {
+      background:
+        repeating-linear-gradient(
+          0deg,
+          transparent 0,
+          transparent 18px,
+          rgba(0,245,255,0.055) 19px,
+          transparent 22px
+        );
+      animation: scan-noise-drift 0.55s linear infinite;
+      opacity: 0.38;
+      mix-blend-mode: screen;
+    }
+    @keyframes scan-field-spin {
+      from { transform: rotate(0deg) scale(1); }
+      to   { transform: rotate(360deg) scale(1.08); }
+    }
+    @keyframes scan-noise-drift {
+      from { transform: translateY(-18px); }
+      to   { transform: translateY(18px); }
+    }
  
     #scan-canvas {
       position: absolute;
@@ -405,29 +569,73 @@
       display: flex;
       flex-direction: column;
       align-items: center;
-      gap: 36px;
+      gap: 38px;
+      width: min(88vw, 620px);
     }
  
     .scanning-title {
       font-family: var(--font-display);
-      font-size: 12px;
+      font-size: clamp(13px, 2vw, 18px);
       letter-spacing: 0.5em;
       color: var(--cyan);
-      animation: blink 0.9s ease-in-out infinite;
+      text-align: center;
+      text-shadow: 0 0 18px rgba(0,245,255,0.8), 0 0 42px rgba(123,47,255,0.5);
+      animation: blink 0.7s ease-in-out infinite, scan-title-surge 1.8s ease-in-out infinite;
     }
     @keyframes blink {
       0%, 100% { opacity: 1; }
       50%       { opacity: 0.25; }
     }
+    @keyframes scan-title-surge {
+      0%, 100% { transform: translateY(0); filter: brightness(1); }
+      50%      { transform: translateY(-2px); filter: brightness(1.5); }
+    }
  
     /* Concentric ring arena */
     .ring-arena {
       position: relative;
-      width: 300px;
-      height: 300px;
+      width: min(72vw, 460px);
+      height: min(72vw, 460px);
+      min-width: 320px;
+      min-height: 320px;
       display: flex;
       align-items: center;
       justify-content: center;
+      filter: drop-shadow(0 0 36px rgba(0,245,255,0.32));
+    }
+    .ring-arena::before {
+      content: '';
+      position: absolute;
+      width: 82%;
+      height: 82%;
+      border-radius: 50%;
+      background:
+        linear-gradient(rgba(0,245,255,0.13) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(0,245,255,0.13) 1px, transparent 1px);
+      background-size: 24px 24px;
+      -webkit-mask-image: radial-gradient(circle, #000 0 56%, transparent 72%);
+      mask-image: radial-gradient(circle, #000 0 56%, transparent 72%);
+      animation: scanner-grid-pulse 1.6s ease-in-out infinite;
+    }
+    .ring-arena::after {
+      content: '';
+      position: absolute;
+      width: 88%;
+      height: 88%;
+      border-radius: 50%;
+      border: 1px solid rgba(255,255,255,0.08);
+      box-shadow:
+        inset 0 0 36px rgba(0,245,255,0.14),
+        0 0 80px rgba(123,47,255,0.26);
+      animation: scanner-shell 2.1s ease-in-out infinite;
+    }
+    @keyframes scanner-grid-pulse {
+      0%, 100% { opacity: 0.25; transform: scale(0.95) rotate(0deg); }
+      50%      { opacity: 0.8; transform: scale(1.04) rotate(4deg); }
+    }
+    @keyframes scanner-shell {
+      0%, 100% { transform: scale(0.96); opacity: 0.55; }
+      50%      { transform: scale(1.05); opacity: 1; }
     }
  
     .scan-ring {
@@ -435,83 +643,168 @@
       border-radius: 50%;
     }
     .scan-ring-a {
-      width: 200px; height: 200px;
+      width: 250px; height: 250px;
       border: 2.5px solid var(--cyan);
       box-shadow: 0 0 28px var(--cyan), inset 0 0 28px rgba(0,245,255,0.08);
-      animation: ring-burst 2s ease-out forwards;
+      animation: ring-burst 1.7s ease-out infinite;
     }
     .scan-ring-b {
-      width: 200px; height: 200px;
+      width: 250px; height: 250px;
       border: 1.5px solid rgba(123,47,255,0.85);
       box-shadow: 0 0 20px var(--nebula);
-      animation: ring-burst 2s ease-out 0.35s forwards;
+      animation: ring-burst 1.7s ease-out 0.32s infinite;
       opacity: 0;
     }
     .scan-ring-c {
-      width: 200px; height: 200px;
+      width: 250px; height: 250px;
       border: 1px solid rgba(0,245,255,0.3);
-      animation: ring-burst 2s ease-out 0.7s forwards;
+      animation: ring-burst 1.7s ease-out 0.64s infinite;
+      opacity: 0;
+    }
+    .scan-ring-d {
+      width: 250px; height: 250px;
+      border: 1px dashed rgba(255,183,3,0.45);
+      box-shadow: 0 0 18px rgba(255,183,3,0.18);
+      animation: ring-burst 1.7s ease-out 0.96s infinite;
       opacity: 0;
     }
  
     @keyframes ring-burst {
       0%   { transform: scale(0.4); opacity: 0; }
       20%  { opacity: 1; }
-      100% { transform: scale(1.9); opacity: 0; }
+      100% { transform: scale(2.15); opacity: 0; }
     }
  
     .ring-center {
       position: relative;
       z-index: 2;
-      width: 76px;
-      height: 76px;
+      width: 150px;
+      height: 150px;
       border-radius: 50%;
       border: 2px solid var(--cyan);
       background: radial-gradient(circle, rgba(0,245,255,0.25) 0%, transparent 70%);
-      box-shadow: var(--glow-cyan);
+      box-shadow:
+        var(--glow-cyan),
+        inset 0 0 42px rgba(123,47,255,0.22);
       display: flex;
       align-items: center;
       justify-content: center;
+      animation: ring-center-charge 1.35s ease-in-out infinite;
+      overflow: hidden;
+    }
+    .ring-center::before {
+      content: '🖐';
+      position: absolute;
+      font-size: 70px;
+      line-height: 1;
+      opacity: 0.82;
+      filter: drop-shadow(0 0 18px rgba(0,245,255,0.9));
+      animation: hand-scan-lock 1.1s ease-in-out infinite;
+    }
+    .ring-center::after {
+      content: '';
+      position: absolute;
+      left: 14%;
+      right: 14%;
+      height: 4px;
+      border-radius: 999px;
+      background: linear-gradient(90deg, transparent, rgba(0,245,255,0.95), rgba(255,255,255,0.9), transparent);
+      box-shadow: 0 0 22px rgba(0,245,255,0.95);
+      animation: center-scan-line 0.82s ease-in-out infinite;
     }
  
     .ring-center-dot {
-      width: 14px;
-      height: 14px;
+      width: 22px;
+      height: 22px;
       border-radius: 50%;
       background: var(--cyan);
       box-shadow: 0 0 18px var(--cyan);
       animation: dot-pulse 0.55s ease-in-out infinite alternate;
+      opacity: 0.72;
     }
     @keyframes dot-pulse {
       from { transform: scale(1); opacity: 1; }
       to   { transform: scale(1.6); opacity: 0.6; }
     }
+    @keyframes ring-center-charge {
+      0%, 100% { transform: scale(1); filter: brightness(1); }
+      50%      { transform: scale(1.08); filter: brightness(1.45); }
+    }
+    @keyframes hand-scan-lock {
+      0%, 100% { transform: translateY(0) scale(1); opacity: 0.72; }
+      50%      { transform: translateY(-4px) scale(1.08); opacity: 1; }
+    }
+    @keyframes center-scan-line {
+      0%   { top: 16%; opacity: 0; }
+      18%  { opacity: 1; }
+      82%  { opacity: 1; }
+      100% { top: 84%; opacity: 0; }
+    }
  
     /* Progress bar */
     .progress-wrap {
-      width: 240px;
+      width: min(80vw, 460px);
     }
     .progress-track {
-      height: 2px;
+      height: 16px;
       background: rgba(255,255,255,0.08);
-      border-radius: 1px;
+      border: 1px solid rgba(0,245,255,0.2);
+      border-radius: 999px;
       overflow: hidden;
-      margin-bottom: 8px;
+      margin-bottom: 14px;
+      box-shadow: inset 0 0 18px rgba(0,0,0,0.5), 0 0 24px rgba(0,245,255,0.14);
     }
     .progress-fill {
       height: 100%;
       width: 0%;
-      background: linear-gradient(90deg, var(--nebula), var(--cyan));
-      border-radius: 1px;
-      box-shadow: 0 0 10px var(--cyan);
+      background:
+        repeating-linear-gradient(90deg, rgba(255,255,255,0.26) 0 10px, transparent 10px 18px),
+        linear-gradient(90deg, var(--nebula), var(--cyan), var(--amber));
+      border-radius: 999px;
+      box-shadow: 0 0 18px var(--cyan), 0 0 42px rgba(123,47,255,0.35);
       transition: width 0.08s linear;
     }
     .progress-pct {
       font-family: var(--font-display);
+      font-size: clamp(24px, 6vw, 48px);
+      font-weight: 900;
+      letter-spacing: 0.12em;
+      color: var(--white);
+      text-align: center;
+      text-shadow: 0 0 18px var(--cyan), 0 0 50px rgba(0,245,255,0.45);
+    }
+
+    /* ============================================================
+       INTRO VIDEO (after scan)
+       ============================================================ */
+    #screen-video {
+      background: #000;
+      z-index: 28;
+    }
+    .intro-video {
+      position: absolute;
+      inset: 0;
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      background: #000;
+    }
+    .video-loading {
+      position: absolute;
+      bottom: 34px;
+      left: 50%;
+      transform: translateX(-50%);
+      z-index: 2;
+      font-family: var(--font-display);
       font-size: 10px;
-      letter-spacing: 0.3em;
-      color: var(--muted);
-      text-align: right;
+      letter-spacing: 0.42em;
+      color: rgba(255,255,255,0.66);
+      text-shadow: 0 0 18px rgba(0,245,255,0.6);
+      opacity: 0;
+      transition: opacity 0.25s ease;
+    }
+    #screen-video.loading .video-loading {
+      opacity: 1;
     }
  
     /* ============================================================
@@ -556,23 +849,44 @@
       color: var(--cyan);
       opacity: 0.65;
     }
- 
-    .btn-restart {
-      margin-top: 12px;
-      padding: 14px 44px;
-      border: 1.5px solid rgba(0,245,255,0.3);
-      border-radius: 40px;
-      background: rgba(0,245,255,0.04);
-      color: var(--cyan);
+
+    /* สไลด์ต้อนรับ (หลังจบวิดีโอ) */
+    .welcome-eyebrow {
       font-family: var(--font-display);
       font-size: 11px;
-      letter-spacing: 0.3em;
-      cursor: pointer;
-      transition: background 0.2s, box-shadow 0.2s;
+      letter-spacing: 0.5em;
+      color: var(--cyan);
+      opacity: 0.7;
+      text-transform: uppercase;
     }
-    .btn-restart:active {
-      background: rgba(0,245,255,0.12);
-      box-shadow: var(--glow-cyan);
+    .welcome-title {
+      font-family: 'Kanit', var(--font-body);
+      font-weight: 700;
+      font-size: clamp(28px, 5.5vw, 60px);
+      line-height: 1.25;
+      text-align: center;
+      color: var(--white);
+      text-shadow: 0 0 24px rgba(0,245,255,0.55), 0 0 60px rgba(123,47,255,0.4);
+      animation: welcome-rise 0.8s var(--ease-out) both;
+    }
+    @keyframes welcome-rise {
+      from { opacity: 0; transform: translateY(24px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+ 
+    /* ข้อความบอกใบ้ว่าแตะหน้าจอเพื่อเริ่มใหม่ */
+    .welcome-hint {
+      margin-top: 10px;
+      font-family: 'Kanit', var(--font-body);
+      font-size: 13px;
+      letter-spacing: 0.15em;
+      color: var(--cyan);
+      opacity: 0.5;
+      animation: welcome-hint-pulse 1.8s ease-in-out infinite;
+    }
+    @keyframes welcome-hint-pulse {
+      0%, 100% { opacity: 0.35; }
+      50%       { opacity: 0.7; }
     }
  
     /* ============================================================
@@ -626,7 +940,19 @@
     <div class="corner tr"></div>
     <div class="corner bl"></div>
     <div class="corner br"></div>
- 
+
+    <!-- เอฟเฟคข้างจอ: ดาวเคราะห์ลอย + ออร์บ + ขีด HUD -->
+    <div class="start-deco" aria-hidden="true">
+      <div class="deco-planet deco-planet-left"></div>
+      <div class="deco-planet deco-planet-right"></div>
+      <span class="deco-orb deco-orb-1"></span>
+      <span class="deco-orb deco-orb-2"></span>
+      <span class="deco-orb deco-orb-3"></span>
+      <span class="deco-orb deco-orb-4"></span>
+      <div class="deco-hud deco-hud-left"><span></span><span></span><span></span></div>
+      <div class="deco-hud deco-hud-right"><span></span><span></span><span></span></div>
+    </div>
+
     <p class="start-eyebrow">GALAXY GATE EXPERIENCE</p>
     <h1 class="start-title">ยินดีต้อนรับ<br>สู่ห้วงอวกาศ</h1>
  
@@ -663,6 +989,11 @@
       </div>
  
       <div class="hand-pad" id="hand-pad" role="button" aria-label="วางมือที่นี่">
+        <span class="pad-corner tl"></span>
+        <span class="pad-corner tr"></span>
+        <span class="pad-corner bl"></span>
+        <span class="pad-corner br"></span>
+        <div class="hand-reticle"></div>
         <div class="pad-sweep"></div>
         <div class="hand-content">
           <div class="hand-icon">🖐</div>
@@ -689,6 +1020,7 @@
         <div class="scan-ring scan-ring-a" id="ring-a"></div>
         <div class="scan-ring scan-ring-b" id="ring-b"></div>
         <div class="scan-ring scan-ring-c" id="ring-c"></div>
+        <div class="scan-ring scan-ring-d" id="ring-d"></div>
         <div class="ring-center">
           <div class="ring-center-dot"></div>
         </div>
@@ -704,14 +1036,33 @@
   </div>
  
   <!-- ══════════════════════════════════════════════
+       INTRO VIDEO – after scan complete
+  ══════════════════════════════════════════════ -->
+  <div id="screen-video" class="screen">
+    <video
+      id="intro-video"
+      class="intro-video"
+      src="intro.mp4"
+      preload="auto"
+      playsinline
+      webkit-playsinline
+    ></video>
+    <p class="video-loading">LOADING INTRO VIDEO</p>
+  </div>
+
+  <!-- เสียงเอฟเฟค: warp (Screen 2) และ scanning (Screen 4) — src กำหนดผ่าน JS จาก CONFIG -->
+  <audio id="warp-audio" preload="auto"></audio>
+  <audio id="scan-audio" preload="auto"></audio>
+
+  <!-- ══════════════════════════════════════════════
        SCREEN 5 – COMPLETE
   ══════════════════════════════════════════════ -->
   <div id="screen-complete" class="screen">
     <div class="complete-ui">
-      <div class="complete-icon" id="complete-icon">✅</div>
-      <h2 class="complete-title">สแกนสำเร็จ!</h2>
-      <p class="complete-sub">SIGNAL SENT TO LED DISPLAY</p>
-      <button class="btn-restart" id="btn-restart">↺ เริ่มใหม่</button>
+      <div class="complete-icon" id="complete-icon">🔭</div>
+      <p class="welcome-eyebrow">SCIENCE WEEK</p>
+      <h2 class="welcome-title">ยินดีต้อนรับสู่<br>งานสัปดาห์วิทยาศาสตร์</h2>
+      <p class="welcome-hint">แตะหน้าจอเพื่อเริ่มใหม่</p>
     </div>
   </div>
  
@@ -731,19 +1082,24 @@
     WS_URL:          'ws://192.168.1.100:3001',       // WebSocket server
     LED_API_URL:     'http://192.168.1.100:3000/api/trigger',  // HTTP fallback
     USE_WEBSOCKET:   true,                            // true = WS, false = HTTP only
-    SCAN_DURATION:   2600,                            // ms (scan animation length)
-    AUTO_RESET_MS:   9000,                            // ms before auto-reset (0 = off)
+    SCAN_DURATION:   7500,                            // ms (ไล่ progress 0→100% ใน 7.5 วินาที)
+    INTRO_VIDEO_URL:  'video_HelloWorld-v2.mp4',                     // video after scan complete
+    WARP_AUDIO_URL:  'เสีนงที่ 2.mp3',                 // เสียงตอน warp (Screen 2)
+    SCAN_AUDIO_URL:  'เสียงเอฟเฟคตอนสแกนมือ.mp3',       // เสียงตอนสแกนมือ (Screen 4)
+    AUTO_RESET_MS:   0,                            // ms before auto-reset (0 = off)
     DEMO_MODE:       true,                            // true = skip network, just animate
   };
  
   /* ============================================================
      STATE MACHINE
   ============================================================ */
-  const S = { START:'start', WARP:'warp', SCAN:'scan', SCANNING:'scanning', DONE:'done' };
+  const S = { START:'start', WARP:'warp', SCAN:'scan', SCANNING:'scanning', VIDEO:'video', DONE:'done' };
   let state = S.START;
   let ws = null;
+  let wsReconnectTimer = null;
   let progressTimer = null;
   let autoResetTimer = null;
+  let videoFallbackTimer = null;
   let scanCleanup = null;
  
   const screens = {
@@ -751,6 +1107,7 @@
     [S.WARP]:     document.getElementById('screen-transition'),
     [S.SCAN]:     document.getElementById('screen-scan'),
     [S.SCANNING]: document.getElementById('screen-scanning'),
+    [S.VIDEO]:    document.getElementById('screen-video'),
     [S.DONE]:     document.getElementById('screen-complete'),
   };
  
@@ -776,24 +1133,31 @@
     switch (s) {
       case S.WARP:
         runWarp();
+        playSound('warp-audio', CONFIG.WARP_AUDIO_URL);
         setTimeout(() => {
+          stopSound('warp-audio');
           goto(S.SCAN);
           startNebulaCanvas();
-        }, 2700);
+        }, 3000);   // หน้า warp ยาว 3 วินาที
         break;
- 
+
       case S.SCANNING:
         restartRings();
         startProgress();
+        playSound('scan-audio', CONFIG.SCAN_AUDIO_URL);
         scanCleanup = runScanCanvas();
         setTimeout(async () => {
           if (scanCleanup) scanCleanup();
+          stopSound('scan-audio');
           await sendLEDSignal();
-          goto(S.DONE);
-          scheduleAutoReset();
+          goto(S.VIDEO);
         }, CONFIG.SCAN_DURATION);
         break;
  
+      case S.VIDEO:
+        playIntroVideo();
+        break;
+
       case S.DONE:
         refreshIcon('complete-icon');
         break;
@@ -842,7 +1206,7 @@
     const ctx = c.getContext('2d');
     c.width = innerWidth; c.height = innerHeight;
     const cx = c.width / 2, cy = c.height / 2;
-    const t0 = Date.now(), DUR = 2600;
+    const t0 = Date.now(), DUR = 3000;   // ให้ animation ยาวเท่าหน้า warp (3 วินาที)
  
     const streaks = Array.from({ length: 220 }, () => {
       const angle = Math.random() * Math.PI * 2;
@@ -929,26 +1293,54 @@
     c.width = innerWidth; c.height = innerHeight;
     const cx = c.width / 2, cy = c.height / 2 - 40;
     const particles = [];
+    const bolts = [];
     let raf = null;
  
     function spawn() {
       const angle = Math.random() * Math.PI * 2;
-      const spd   = Math.random() * 3.5 + 1;
+      const spd   = Math.random() * 5.5 + 1.5;
       particles.push({
-        x: cx, y: cy,
+        x: cx + (Math.random() - 0.5) * 150,
+        y: cy + (Math.random() - 0.5) * 150,
         vx: Math.cos(angle) * spd, vy: Math.sin(angle) * spd,
         life: 1,
-        decay: Math.random() * 0.022 + 0.01,
-        r: Math.random() * 3 + 1,
+        decay: Math.random() * 0.024 + 0.008,
+        r: Math.random() * 4.8 + 1.2,
+        hue: Math.random() > 0.68 ? 42 : (Math.random() > 0.5 ? 188 : 268),
+      });
+    }
+
+    function spawnBolt() {
+      const angle = Math.random() * Math.PI * 2;
+      const radius = Math.random() * 170 + 80;
+      bolts.push({
+        x1: cx + Math.cos(angle) * radius,
+        y1: cy + Math.sin(angle) * radius,
+        x2: cx + Math.cos(angle + 0.22) * (radius * 0.55),
+        y2: cy + Math.sin(angle + 0.22) * (radius * 0.55),
+        life: 1,
         hue: Math.random() > 0.55 ? 188 : 268,
       });
     }
  
     (function draw() {
-      ctx.clearRect(0, 0, c.width, c.height);
+      ctx.fillStyle = 'rgba(0,8,20,0.18)';
+      ctx.fillRect(0, 0, c.width, c.height);
  
       // Spawn burst
-      for (let i = 0; i < 4; i++) spawn();
+      for (let i = 0; i < 10; i++) spawn();
+      if (Math.random() > 0.72) spawnBolt();
+
+      // Outer energy halo
+      const pulse = 0.55 + Math.sin(Date.now() / 120) * 0.16;
+      const halo = ctx.createRadialGradient(cx, cy, 20, cx, cy, 260);
+      halo.addColorStop(0, `rgba(0,245,255,${0.16 + pulse * 0.08})`);
+      halo.addColorStop(0.48, `rgba(123,47,255,${0.07 + pulse * 0.05})`);
+      halo.addColorStop(1, 'transparent');
+      ctx.beginPath();
+      ctx.arc(cx, cy, 260, 0, Math.PI * 2);
+      ctx.fillStyle = halo;
+      ctx.fill();
  
       // Particles
       for (let i = particles.length - 1; i >= 0; i--) {
@@ -959,21 +1351,43 @@
         if (p.life <= 0) { particles.splice(i, 1); continue; }
         ctx.beginPath();
         ctx.arc(p.x, p.y, p.r * p.life, 0, Math.PI * 2);
+        ctx.shadowBlur = 16;
+        ctx.shadowColor = `hsl(${p.hue},100%,70%)`;
         ctx.fillStyle = `hsla(${p.hue},100%,70%,${p.life * 0.75})`;
         ctx.fill();
+        ctx.shadowBlur = 0;
+      }
+
+      // Electric arcs
+      for (let i = bolts.length - 1; i >= 0; i--) {
+        const b = bolts[i];
+        b.life -= 0.08;
+        if (b.life <= 0) { bolts.splice(i, 1); continue; }
+        ctx.beginPath();
+        ctx.moveTo(b.x1, b.y1);
+        ctx.lineTo((b.x1 + b.x2) / 2 + (Math.random() - 0.5) * 42, (b.y1 + b.y2) / 2 + (Math.random() - 0.5) * 42);
+        ctx.lineTo(b.x2, b.y2);
+        ctx.strokeStyle = `hsla(${b.hue},100%,75%,${b.life * 0.75})`;
+        ctx.lineWidth = 2.2;
+        ctx.shadowBlur = 18;
+        ctx.shadowColor = `hsl(${b.hue},100%,70%)`;
+        ctx.stroke();
+        ctx.shadowBlur = 0;
       }
  
       // Sweep line
-      const sweepY = cy - 130 + ((Date.now() % 900) / 900) * 260;
-      const grad = ctx.createLinearGradient(cx - 150, sweepY, cx + 150, sweepY);
+      const sweepY = cy - 190 + ((Date.now() % 760) / 760) * 380;
+      const grad = ctx.createLinearGradient(cx - 240, sweepY, cx + 240, sweepY);
       grad.addColorStop(0, 'transparent');
+      grad.addColorStop(0.22, 'rgba(123,47,255,0.55)');
       grad.addColorStop(0.5, 'rgba(0,245,255,0.85)');
+      grad.addColorStop(0.78, 'rgba(255,183,3,0.55)');
       grad.addColorStop(1, 'transparent');
       ctx.beginPath();
-      ctx.moveTo(cx - 150, sweepY); ctx.lineTo(cx + 150, sweepY);
+      ctx.moveTo(cx - 240, sweepY); ctx.lineTo(cx + 240, sweepY);
       ctx.strokeStyle = grad;
-      ctx.lineWidth = 2;
-      ctx.shadowBlur = 12; ctx.shadowColor = '#00f5ff';
+      ctx.lineWidth = 5;
+      ctx.shadowBlur = 22; ctx.shadowColor = '#00f5ff';
       ctx.stroke();
       ctx.shadowBlur = 0;
  
@@ -989,19 +1403,24 @@
   function startProgress() {
     const fill = document.getElementById('progress-fill');
     const pct  = document.getElementById('progress-pct');
-    let p = 0;
-    if (progressTimer) clearInterval(progressTimer);
-    progressTimer = setInterval(() => {
-      p = Math.min(p + 1, 100);
-      fill.style.width = `${p}%`;
-      pct.textContent  = `${p}%`;
-      if (p >= 100) clearInterval(progressTimer);
-    }, CONFIG.SCAN_DURATION / 100);
+    // ใช้ requestAnimationFrame คำนวณจากเวลาจริง → เดินหน้าลื่น 60fps ไม่สะดุด
+    if (progressTimer) cancelAnimationFrame(progressTimer);
+    fill.style.transition = 'none';   // rAF ขับ width เองทุกเฟรม ไม่ต้องพึ่ง CSS transition
+    fill.style.width = '0%';
+    pct.textContent = '0%';
+    const startTime = performance.now();
+    const duration  = CONFIG.SCAN_DURATION;
+    (function step(now) {
+      const p = Math.min((now - startTime) / duration, 1);   // 0 → 1 ตามเวลาที่ผ่านไป
+      fill.style.width = `${(p * 100).toFixed(2)}%`;
+      pct.textContent  = `${Math.round(p * 100)}%`;
+      if (p < 1) progressTimer = requestAnimationFrame(step);
+    })(startTime);
   }
  
   /* ─── Restart ring CSS animations ─── */
   function restartRings() {
-    ['ring-a','ring-b','ring-c'].forEach(id => {
+    ['ring-a','ring-b','ring-c','ring-d'].forEach(id => {
       const el = document.getElementById(id);
       el.style.animation = 'none';
       void el.offsetWidth; // reflow
@@ -1022,6 +1441,84 @@
     if (!CONFIG.AUTO_RESET_MS) return;
     if (autoResetTimer) clearTimeout(autoResetTimer);
     autoResetTimer = setTimeout(() => goto(S.START), CONFIG.AUTO_RESET_MS);
+  }
+
+  /* ─── Sound effects (warp / scanning) ─── */
+  // เล่นเสียงเอฟเฟคจาก audio element โดยรีเซ็ตให้เริ่มที่ 0 ทุกครั้ง (รองรับเล่นซ้ำทุกรอบ)
+  function playSound(id, url) {
+    const el = document.getElementById(id);
+    if (!el) return;
+    if (!el.src) el.src = encodeURI(url);   // encodeURI จัดการช่องว่าง + อักขระไทยในชื่อไฟล์
+    try { el.currentTime = 0; } catch (e) {}
+    const p = el.play();
+    if (p && typeof p.catch === 'function') p.catch(() => {}); // กัน error เงียบ ๆ ถ้า browser บล็อค
+  }
+
+  // หยุดและรีเซ็ตเสียง (เรียกตอนออกจากหน้า เพื่อไม่ให้เสียงซ้อน)
+  function stopSound(id) {
+    const el = document.getElementById(id);
+    if (!el) return;
+    el.pause();
+    try { el.currentTime = 0; } catch (e) {}
+  }
+
+  /* ─── Intro video after successful scan ─── */
+  function playIntroVideo() {
+    const videoScreen = screens[S.VIDEO];
+    const video = document.getElementById('intro-video');
+    if (!video) {
+      finishIntroVideo();
+      return;
+    }
+
+    videoScreen.classList.add('loading');
+    video.src = CONFIG.INTRO_VIDEO_URL;
+    video.muted = false;
+    video.pause();
+    try { video.currentTime = 0; } catch (e) {}
+ 
+    const armVideoFallback = () => {
+      if (videoFallbackTimer) clearTimeout(videoFallbackTimer);
+      const durationMs = Number.isFinite(video.duration) ? Math.ceil(video.duration * 1000) + 5000 : 120000;
+      videoFallbackTimer = setTimeout(finishIntroVideo, Math.max(durationMs, 10000));
+    };
+
+    video.onloadedmetadata = armVideoFallback;
+    video.oncanplay = () => videoScreen.classList.remove('loading');
+    video.onended = finishIntroVideo;
+    video.onerror = finishIntroVideo;
+ 
+    armVideoFallback();
+
+    const playback = video.play();
+    if (playback && typeof playback.catch === 'function') {
+      playback.catch(() => {
+        video.muted = true;
+        video.play().catch(finishIntroVideo);
+      });
+    }
+  }
+
+  function finishIntroVideo() {
+    if (state !== S.VIDEO) return;
+    const videoScreen = screens[S.VIDEO];
+    const video = document.getElementById('intro-video');
+
+    if (videoFallbackTimer) {
+      clearTimeout(videoFallbackTimer);
+      videoFallbackTimer = null;
+    }
+    if (video) {
+      video.pause();
+      video.onloadedmetadata = null;
+      video.oncanplay = null;
+      video.onended = null;
+      video.onerror = null;
+    }
+    if (videoScreen) videoScreen.classList.remove('loading');
+
+    goto(S.DONE);
+    scheduleAutoReset();
   }
  
   /* ============================================================
@@ -1078,12 +1575,29 @@
   function initWS() {
     if (!CONFIG.USE_WEBSOCKET || CONFIG.DEMO_MODE) return;
     try {
+      if (wsReconnectTimer) {
+        clearTimeout(wsReconnectTimer);
+        wsReconnectTimer = null;
+      }
+
+      if (ws && (ws.readyState === WebSocket.OPEN || ws.readyState === WebSocket.CONNECTING)) {
+        return;
+      }
+
       ws = new WebSocket(CONFIG.WS_URL);
-      ws.onopen    = () => setDot('connected', 'WS CONNECTED');
-      ws.onclose   = () => { setDot('disconnected', 'DISCONNECTED'); setTimeout(initWS, 5000); };
-      ws.onerror   = () => {};
+      ws.onopen = () => setDot('connected', 'WS CONNECTED');
+      ws.onclose = () => {
+        ws = null;
+        setDot('disconnected', 'DISCONNECTED');
+        wsReconnectTimer = setTimeout(initWS, 5000);
+      };
+      ws.onerror = event => {
+        console.warn('[WS] Connection error:', event);
+        if (ws) ws.close();
+      };
     } catch (e) {
       console.warn('[WS] Cannot connect:', e.message);
+      wsReconnectTimer = setTimeout(initWS, 5000);
     }
   }
  
@@ -1115,10 +1629,21 @@
     if (state === S.SCAN) goto(S.SCANNING);
   });
  
-  document.getElementById('btn-restart').addEventListener('click', () => {
+  /* ─── แตะที่หน้าจอต้อนรับเพื่อเริ่มใหม่ (ไม่มีปุ่มแล้ว) ─── */
+  function restartExperience() {
+    if (state !== S.DONE) return;   // รับแตะเฉพาะตอนอยู่หน้าต้อนรับ
     if (autoResetTimer) clearTimeout(autoResetTimer);
+    stopSound('warp-audio');   // กันเสียงค้างเผื่อกรณี edge
+    stopSound('scan-audio');
     goto(S.START);
-  });
+  }
+
+  const completeScreen = screens[S.DONE];
+  completeScreen.addEventListener('touchstart', e => {
+    e.preventDefault();
+    restartExperience();
+  }, { passive: false });
+  completeScreen.addEventListener('mousedown', restartExperience);   // fallback สำหรับทดสอบบน desktop
  
   /* ============================================================
      BOOT
