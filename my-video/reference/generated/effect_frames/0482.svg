@@ -1,0 +1,47 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1920" height="1080" viewBox="0 0 1920 1080">
+<defs>
+<radialGradient id="spaceGlow" cx="52%" cy="56%" r="54%"><stop offset="0%" stop-color="#132a42"/><stop offset="38%" stop-color="#111630"/><stop offset="100%" stop-color="#030712"/></radialGradient>
+<radialGradient id="robotBody" cx="40%" cy="24%" r="85%"><stop offset="0%" stop-color="#ffffff"/><stop offset="52%" stop-color="#dce9ff"/><stop offset="100%" stop-color="#93a6bd"/></radialGradient>
+<radialGradient id="blueCore" cx="40%" cy="30%" r="70%"><stop offset="0%" stop-color="#8df4ff"/><stop offset="45%" stop-color="#4895ff"/><stop offset="100%" stop-color="#1a47ff"/></radialGradient>
+<filter id="softGlow" x="-80%" y="-80%" width="260%" height="260%"><feGaussianBlur stdDeviation="16" result="blur"/><feMerge><feMergeNode in="blur"/><feMergeNode in="SourceGraphic"/></feMerge></filter>
+<filter id="wideGlow" x="-120%" y="-120%" width="340%" height="340%"><feGaussianBlur stdDeviation="34" result="blur"/><feMerge><feMergeNode in="blur"/><feMergeNode in="SourceGraphic"/></feMerge></filter>
+</defs>
+<ellipse cx="960" cy="773.1" rx="287.1" ry="207.5" fill="none" stroke="#70d6ff" stroke-width="4" opacity="0.196" filter="url(#softGlow)"/>
+<path d="M820 740 C770 700 770 825 825 795" stroke="#c4f4ff" stroke-width="10" opacity="0.294" fill="none" stroke-linecap="round" filter="url(#softGlow)"/>
+<path d="M1098 724 C1162 686 1164 822 1098 794" stroke="#c4f4ff" stroke-width="10" opacity="0.186" fill="none" stroke-linecap="round" filter="url(#softGlow)"/>
+<circle cx="851.2" cy="910.7" r="4.0" fill="#c8f7ff" opacity="0.318" filter="url(#softGlow)"/>
+<circle cx="748.2" cy="916.2" r="5.0" fill="#c8f7ff" opacity="0.259" filter="url(#softGlow)"/>
+<circle cx="713.4" cy="803.9" r="6.0" fill="#c8f7ff" opacity="0.185" filter="url(#softGlow)"/>
+<circle cx="846.3" cy="680.8" r="7.0" fill="#c8f7ff" opacity="0.124" filter="url(#softGlow)"/>
+<circle cx="957.4" cy="622.0" r="4.0" fill="#c8f7ff" opacity="0.100" filter="url(#softGlow)"/>
+<circle cx="1109.5" cy="602.0" r="5.0" fill="#c8f7ff" opacity="0.122" filter="url(#softGlow)"/>
+<circle cx="1140.2" cy="707.4" r="6.0" fill="#c8f7ff" opacity="0.182" filter="url(#softGlow)"/>
+<circle cx="1173.5" cy="828.2" r="7.0" fill="#c8f7ff" opacity="0.256" filter="url(#softGlow)"/>
+<circle cx="1112.7" cy="899.3" r="4.0" fill="#c8f7ff" opacity="0.317" filter="url(#softGlow)"/>
+<circle cx="960.6" cy="933.5" r="5.0" fill="#c8f7ff" opacity="0.340" filter="url(#softGlow)"/>
+
+
+
+
+
+
+<g opacity="1.000" filter="url(#softGlow)">
+  <line x1="984.2" y1="534.3" x2="1364.2" y2="397.5" stroke="#75b9ff" stroke-width="8" stroke-linecap="round"/>
+  <line x1="1002.2" y1="528.3" x2="1514.2" y2="343.5" stroke="#ffffff" stroke-width="2" stroke-linecap="round" opacity="0.92"/>
+</g>
+
+<circle cx="1087" cy="1010" r="3.5" fill="#bff7ff" opacity="0.055" filter="url(#softGlow)"/>
+<circle cx="318" cy="121" r="3.0" fill="#bff7ff" opacity="0.110" filter="url(#softGlow)"/>
+<circle cx="210" cy="613" r="2.2" fill="#bff7ff" opacity="0.126" filter="url(#softGlow)"/>
+<circle cx="1635" cy="819" r="2.7" fill="#bff7ff" opacity="0.037" filter="url(#softGlow)"/>
+<circle cx="540" cy="33" r="1.9" fill="#bff7ff" opacity="0.136" filter="url(#softGlow)"/>
+<circle cx="165" cy="188" r="3.1" fill="#bff7ff" opacity="0.158" filter="url(#softGlow)"/>
+<circle cx="738" cy="625" r="1.5" fill="#bff7ff" opacity="0.144" filter="url(#softGlow)"/>
+<circle cx="817" cy="885" r="2.3" fill="#bff7ff" opacity="0.075" filter="url(#softGlow)"/>
+<circle cx="1663" cy="344" r="2.5" fill="#bff7ff" opacity="0.114" filter="url(#softGlow)"/>
+<circle cx="234" cy="661" r="3.0" fill="#bff7ff" opacity="0.050" filter="url(#softGlow)"/>
+<circle cx="1093" cy="230" r="2.5" fill="#bff7ff" opacity="0.067" filter="url(#softGlow)"/>
+<circle cx="1660" cy="824" r="4.0" fill="#bff7ff" opacity="0.159" filter="url(#softGlow)"/>
+<circle cx="641" cy="508" r="3.9" fill="#bff7ff" opacity="0.139" filter="url(#softGlow)"/>
+<circle cx="1060" cy="146" r="3.5" fill="#bff7ff" opacity="0.068" filter="url(#softGlow)"/>
+</svg>
