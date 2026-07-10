@@ -1,20 +1,5 @@
-import { AbsoluteFill, Easing, useCurrentFrame, useVideoConfig } from "remotion";
-
-const WIDTH = 1920;
-const HEIGHT = 1080;
-
-function mulberry32(seed: number) {
-  return function random() {
-    seed |= 0;
-    seed = (seed + 0x6d2b79f5) | 0;
-    let t = Math.imul(seed ^ (seed >>> 15), 1 | seed);
-    t = (t + Math.imul(t ^ (t >>> 7), 61 | t)) ^ t;
-    return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
-  };
-}
-
-const easeOut = Easing.bezier(0.16, 1, 0.3, 1);
-const easeInOut = Easing.bezier(0.45, 0, 0.55, 1);
+import { AbsoluteFill, useCurrentFrame, useVideoConfig } from "remotion";
+import { WIDTH, HEIGHT, mulberry32, easeOut, easeInOut, Ufo } from "../components/RobotKit";
 
 // Times are seconds into this 11s overlay window (local timeline).
 const SHOOTING_STARS = [
@@ -68,8 +53,8 @@ const ShootingStar = ({
   );
 };
 
-const NebulaGlow = ({ frame }: { frame: number }) => {
-  const pulse = 0.5 + 0.5 * Math.sin(frame * 0.02);
+const NebulaGlow = ({ frame, rate }: { frame: number; rate: number }) => {
+  const pulse = 0.5 + 0.5 * Math.sin(frame * 0.02 * rate);
   return (
     <>
       <circle cx={280} cy={220} r={260 + 20 * pulse} fill="#5a4fd9" opacity={0.1 + 0.05 * pulse} style={{ mixBlendMode: "screen" }} />
@@ -85,14 +70,14 @@ const NebulaGlow = ({ frame }: { frame: number }) => {
   );
 };
 
-const SpaceDust = ({ frame }: { frame: number }) => {
+const SpaceDust = ({ frame, rate }: { frame: number; rate: number }) => {
   const random = mulberry32(555);
   const dust = Array.from({ length: 46 }).map((_, i) => {
     const x = random() * WIDTH;
     const y = random() * HEIGHT;
     const r = 1 + random() * 2.6;
     const speed = 0.4 + random() * 0.6;
-    const twinkle = 0.5 + 0.5 * Math.sin(frame * 0.05 * speed + i);
+    const twinkle = 0.5 + 0.5 * Math.sin(frame * 0.05 * rate * speed + i);
     return { x, y, r, twinkle };
   });
   return (
@@ -104,8 +89,8 @@ const SpaceDust = ({ frame }: { frame: number }) => {
   );
 };
 
-const LensFlare = ({ frame }: { frame: number }) => {
-  const pulse = 0.5 + 0.5 * Math.sin(frame * 0.03);
+const LensFlare = ({ frame, rate }: { frame: number; rate: number }) => {
+  const pulse = 0.5 + 0.5 * Math.sin(frame * 0.03 * rate);
   return (
     <g style={{ mixBlendMode: "screen" }} opacity={0.16 + 0.08 * pulse}>
       <circle cx={1780} cy={120} r={140} fill="#fff6d8" />
@@ -120,7 +105,7 @@ const LensFlare = ({ frame }: { frame: number }) => {
 const UFO_START = 4.6;
 const UFO_END = 6.6;
 
-const Ufo = ({ frame, fps }: { frame: number; fps: number }) => {
+const UfoFlyby = ({ frame, fps }: { frame: number; fps: number }) => {
   const startFrame = UFO_START * fps;
   const endFrame = UFO_END * fps;
   if (frame < startFrame || frame > endFrame) return null;
@@ -131,11 +116,7 @@ const Ufo = ({ frame, fps }: { frame: number; fps: number }) => {
   const opacity = Math.sin(Math.PI * p);
   return (
     <g transform={`translate(${x} ${y})`} opacity={opacity * 0.85}>
-      <ellipse cx={0} cy={0} rx={80} ry={20} fill="#8fe9ff" />
-      <ellipse cx={0} cy={-16} rx={40} ry={26} fill="#c8fff0" opacity={0.85} />
-      <circle cx={-40} cy={4} r={7} fill="#fff29a" />
-      <circle cx={0} cy={6} r={7} fill="#ff9adf" />
-      <circle cx={40} cy={4} r={7} fill="#fff29a" />
+      <Ufo />
     </g>
   );
 };
@@ -143,17 +124,18 @@ const Ufo = ({ frame, fps }: { frame: number; fps: number }) => {
 export const SpaceEffectsOverlay = () => {
   const frame = useCurrentFrame();
   const { fps } = useVideoConfig();
+  const rate = 30 / fps;
 
   return (
     <AbsoluteFill style={{ pointerEvents: "none" }}>
       <svg width={WIDTH} height={HEIGHT} viewBox={`0 0 ${WIDTH} ${HEIGHT}`}>
-        <NebulaGlow frame={frame} />
-        <SpaceDust frame={frame} />
-        <LensFlare frame={frame} />
+        <NebulaGlow frame={frame} rate={rate} />
+        <SpaceDust frame={frame} rate={rate} />
+        <LensFlare frame={frame} rate={rate} />
         {SHOOTING_STARS.map((s, i) => (
           <ShootingStar key={i} frame={frame} fps={fps} startSec={s.start} x={s.x} y={s.y} len={s.len} hue={s.hue} />
         ))}
-        <Ufo frame={frame} fps={fps} />
+        <UfoFlyby frame={frame} fps={fps} />
       </svg>
     </AbsoluteFill>
   );

@@ -1083,7 +1083,7 @@
     LED_API_URL:     'http://192.168.1.100:3000/api/trigger',  // HTTP fallback
     USE_WEBSOCKET:   true,                            // true = WS, false = HTTP only
     SCAN_DURATION:   7500,                            // ms (ไล่ progress 0→100% ใน 7.5 วินาที)
-    INTRO_VIDEO_URL:  'video_HelloWorld-v2.mp4',                     // video after scan complete
+    INTRO_VIDEO_URL:  'HelloWorld-v3.mp4',                     // video after scan complete
     WARP_AUDIO_URL:  'เสีนงที่ 2.mp3',                 // เสียงตอน warp (Screen 2)
     SCAN_AUDIO_URL:  'เสียงเอฟเฟคตอนสแกนมือ.mp3',       // เสียงตอนสแกนมือ (Screen 4)
     AUTO_RESET_MS:   0,                            // ms before auto-reset (0 = off)
@@ -1292,9 +1292,38 @@
     const ctx = c.getContext('2d');
     c.width = innerWidth; c.height = innerHeight;
     const cx = c.width / 2, cy = c.height / 2 - 40;
+    // ระยะจากจุดกลางถึงมุมจอที่ไกลสุด → วงกลม ripple จะขยายจนถึงขอบจอพอดี
+    const maxR = Math.hypot(Math.max(cx, c.width - cx), Math.max(cy, c.height - cy));
     const particles = [];
     const bolts = [];
     let raf = null;
+
+    // ริปเปิลวงกลมขยายจากกลางจอ 0 → ขอบจอ แบบจางๆ ให้คนสแกนรู้ว่ามีพื้นที่รอบตัว
+    const RIPPLE_COUNT = 3;          // จำนวนวงที่ไล่ตามกันแบบไล่เฟส
+    const RIPPLE_PERIOD = 3600;      // มิลลิวินาที ต่อ 1 รอบ (ช้าๆ นุ่มนวล)
+    const easeOutCubic = (t) => 1 - Math.pow(1 - t, 3);
+
+    function drawRipples(now) {
+      for (let i = 0; i < RIPPLE_COUNT; i++) {
+        // ไล่เฟสให้แต่ละวงห่างกันเท่าๆ กัน วงจะทยอยออกไม่พร้อมกัน
+        const p = ((now / RIPPLE_PERIOD) + i / RIPPLE_COUNT) % 1;
+        const radius = easeOutCubic(p) * maxR;
+        // จางลงเมื่อวงโตขึ้น (จางสุดตอนใกล้ขอบ) + เฟดอินช่วงเริ่มต้นไม่ให้เด้ง
+        const fadeIn = Math.min(p / 0.12, 1);
+        const alpha = 0.18 * (1 - p) * fadeIn;
+        if (alpha <= 0.002) continue;
+        // สลับโทนไซแอน/ม่วงตามธีมสแกน
+        const color = i % 2 === 0 ? '0,245,255' : '123,47,255';
+        ctx.beginPath();
+        ctx.arc(cx, cy, radius, 0, Math.PI * 2);
+        ctx.strokeStyle = `rgba(${color},${alpha})`;
+        ctx.lineWidth = 2.5;
+        ctx.shadowBlur = 12;
+        ctx.shadowColor = `rgba(${color},${alpha})`;
+        ctx.stroke();
+        ctx.shadowBlur = 0;
+      }
+    }
  
     function spawn() {
       const angle = Math.random() * Math.PI * 2;
@@ -1326,7 +1355,10 @@
     (function draw() {
       ctx.fillStyle = 'rgba(0,8,20,0.18)';
       ctx.fillRect(0, 0, c.width, c.height);
- 
+
+      // วงกลม ripple ขยายถึงขอบจอ (วาดก่อน particle เพื่อให้อยู่เลเยอร์หลัง)
+      drawRipples(Date.now());
+
       // Spawn burst
       for (let i = 0; i < 10; i++) spawn();
       if (Math.random() > 0.72) spawnBolt();
