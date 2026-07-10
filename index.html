@@ -384,10 +384,10 @@
     /* Hand placement area */
     .hand-pad {
       position: relative;
-      width: 272px;
-      height: 352px;
+      width: 460px;
+      height: 640px;
       border: 1.5px solid rgba(0,245,255,0.28);
-      border-radius: 28px;
+      border-radius: 36px;
       background: rgba(0,245,255,0.025);
       display: flex;
       align-items: center;
@@ -406,16 +406,16 @@
     /* มุมกรอบเล็งภายในแผ่นสแกน */
     .pad-corner {
       position: absolute;
-      width: 26px; height: 26px;
+      width: 34px; height: 34px;
       border: 2px solid rgba(0,245,255,0.55);
       filter: drop-shadow(0 0 6px rgba(0,245,255,0.5));
       animation: pad-corner-pulse 2.4s ease-in-out infinite;
       pointer-events: none;
     }
-    .pad-corner.tl { top: 14px; left: 14px;  border-width: 2px 0 0 2px; border-radius: 6px 0 0 0; }
-    .pad-corner.tr { top: 14px; right: 14px; border-width: 2px 2px 0 0; border-radius: 0 6px 0 0; }
-    .pad-corner.bl { bottom: 14px; left: 14px;  border-width: 0 0 2px 2px; border-radius: 0 0 0 6px; }
-    .pad-corner.br { bottom: 14px; right: 14px; border-width: 0 2px 2px 0; border-radius: 0 0 6px 0; }
+    .pad-corner.tl { top: 20px; left: 20px;  border-width: 2px 0 0 2px; border-radius: 6px 0 0 0; }
+    .pad-corner.tr { top: 20px; right: 20px; border-width: 2px 2px 0 0; border-radius: 0 6px 0 0; }
+    .pad-corner.bl { bottom: 20px; left: 20px;  border-width: 0 0 2px 2px; border-radius: 0 0 0 6px; }
+    .pad-corner.br { bottom: 20px; right: 20px; border-width: 0 2px 2px 0; border-radius: 0 0 6px 0; }
     @keyframes pad-corner-pulse {
       0%, 100% { opacity: 0.4; }
       50%       { opacity: 1; }
@@ -426,7 +426,7 @@
       position: absolute;
       inset: 0;
       margin: auto;
-      width: 168px; height: 168px;
+      width: 300px; height: 300px;
       border-radius: 50%;
       border: 1.5px dashed rgba(0,245,255,0.4);
       box-shadow: inset 0 0 30px rgba(0,245,255,0.12);
@@ -436,7 +436,7 @@
     .hand-reticle::before {
       content: '';
       position: absolute;
-      inset: 20px;
+      inset: 34px;
       border-radius: 50%;
       border: 1px solid rgba(123,47,255,0.35);
     }
@@ -447,7 +447,7 @@
       content: '';
       position: absolute;
       inset: 0;
-      border-radius: 27px;
+      border-radius: 35px;
       background: linear-gradient(140deg, rgba(0,245,255,0.08) 0%, transparent 60%, rgba(123,47,255,0.06) 100%);
       pointer-events: none;
     }
@@ -455,7 +455,7 @@
     /* Idle sweep line inside pad */
     .pad-sweep {
       position: absolute;
-      left: 12px; right: 12px;
+      left: 20px; right: 20px;
       height: 1.5px;
       background: linear-gradient(90deg, transparent, var(--cyan), transparent);
       box-shadow: 0 0 8px var(--cyan);
@@ -481,7 +481,7 @@
     }
  
     .hand-icon {
-      font-size: 68px;
+      font-size: 120px;
       line-height: 1;
       filter: drop-shadow(0 0 14px rgba(0,245,255,0.55));
     }
@@ -786,9 +786,7 @@
       inset: 0;
       width: 100%;
       height: 100%;
-      height: 100dvh;              /* กันขอบดำบนมือถือที่มีแถบ browser (dynamic viewport) */
-      object-fit: cover;           /* เต็มจอ ยอมครอบขอบ รองรับทุกอัตราส่วน */
-      object-position: center;     /* โฟกัสกลางเฟรมตอนถูกครอบ */
+      object-fit: cover;
       background: #000;
     }
     .video-loading {
@@ -1044,7 +1042,7 @@
     <video
       id="intro-video"
       class="intro-video"
-      src="video-444.mp4"
+      src="intro.mp4"
       preload="auto"
       playsinline
       webkit-playsinline
@@ -1085,7 +1083,7 @@
     LED_API_URL:     'http://192.168.1.100:3000/api/trigger',  // HTTP fallback
     USE_WEBSOCKET:   true,                            // true = WS, false = HTTP only
     SCAN_DURATION:   7500,                            // ms (ไล่ progress 0→100% ใน 7.5 วินาที)
-    INTRO_VIDEO_URL:  'video-444.mp4',                     // video after scan complete
+    INTRO_VIDEO_URL:  'HelloWorld-v3.mp4',                     // video after scan complete
     WARP_AUDIO_URL:  'เสีนงที่ 2.mp3',                 // เสียงตอน warp (Screen 2)
     SCAN_AUDIO_URL:  'เสียงเอฟเฟคตอนสแกนมือ.mp3',       // เสียงตอนสแกนมือ (Screen 4)
     AUTO_RESET_MS:   0,                            // ms before auto-reset (0 = off)
