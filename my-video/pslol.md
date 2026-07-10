@@ -1,24 +1,6 @@
-# แก้ไขวีดีโอ
+# แก้ไข SCREEN 3 – SCAN READY ใน fd.html
 
-
-## แก้ไข index.html ใน video_HelloWorld-v2.mp4
-- ให้เอาไฟล์วีดีโอนี้ video_HelloWorld-v2.mp4 ออก แล้วใส่ไฟล์วีดีโอนี้อทน HelloWorld-v3.mp4
-
-
-### ฉากพวกนี้คือฉากจบหลังจากนักบินอวกาศ หลังจากเปลี่ยนไฟล์วีดีโอเป็น HelloWorld-v3.mp4
-
-### ทำทีละขั้นตอน
-- ให้เพิ่มฉากในไฟล์วีดีโอที่ชื่อ video_HelloWorld-v2.mp4
-- โดยมีฉากแต่ละฉาก ฉากที่1 เคมี ให้มีฉากเล่นสารเคมีระเบิดใส่หุ่นยนต์ ฉากนี้ 3 วิ
-- ฉากที่ 2 คณิต ให้มีหุ่นยนต์คิดสูตรแล้วแล้วมีสูตรเด้งอกมาในคสามคิด ชัดๆ ฉากนี้ 3 วิ
-- ฉากที่ 3 วิทยาศาตร์ ให้เพิ่มจรวดปล่อยควันเยอะๆ ให้คนดูก็รรู้ว่านี้คือวิทยาศาตร์ ฉากนี้ 3 วิ
-- ฉากก่อนปิด ให้ทำเป็นหุ่นยน AI ขี่ UFO พุ่งชนกลางจอจนระเบิด ฉากนี้  2.5 วิ  
-- ข้อความตัวอักษรขยับขึ้นหน่อย เพราะมันใกล้นักบินอวกาศไป
-- แล้วฉากจบสุดท้าย ให้มีหุ่นยนต์ เดินมาขอบจอขวาเดินมาดึงผ้าม่านปิดฉากหน้าจอทั้งหมด
-- ผ้าม่านสีแดง
-
-
-## หลังแก้ไขวีดีโอเพิ่มเอฟเฟครอบข้างใน HelloWorld-v3.mp4
-- เพิ่มเอฟเฟคทั้งคลิปให้มีอะไรที่น่าดึงดูดตื่นเต้นตลอดเวลา
-- แบบน่าสนใจดูดี ดูสนุก
+- Increase the size of the hand placement area so it matches the approximate size of a real human hand.
+- Only enlarge the hand scan target/frame. Do not modify the overall layout, animations, or other UI elements.
+- Keep the hand placement area centered and maintain the existing visual style.
 

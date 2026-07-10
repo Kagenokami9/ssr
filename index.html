@@ -786,7 +786,9 @@
       inset: 0;
       width: 100%;
       height: 100%;
-      object-fit: cover;
+      height: 100dvh;              /* กันขอบดำบนมือถือที่มีแถบ browser (dynamic viewport) */
+      object-fit: cover;           /* เต็มจอ ยอมครอบขอบ รองรับทุกอัตราส่วน */
+      object-position: center;     /* โฟกัสกลางเฟรมตอนถูกครอบ */
       background: #000;
     }
     .video-loading {
@@ -1042,7 +1044,7 @@
     <video
       id="intro-video"
       class="intro-video"
-      src="intro.mp4"
+      src="video-444.mp4"
       preload="auto"
       playsinline
       webkit-playsinline
@@ -1083,7 +1085,7 @@
     LED_API_URL:     'http://192.168.1.100:3000/api/trigger',  // HTTP fallback
     USE_WEBSOCKET:   true,                            // true = WS, false = HTTP only
     SCAN_DURATION:   7500,                            // ms (ไล่ progress 0→100% ใน 7.5 วินาที)
-    INTRO_VIDEO_URL:  'HelloWorld-v3.mp4',                     // video after scan complete
+    INTRO_VIDEO_URL:  'video-444.mp4',                     // video after scan complete
     WARP_AUDIO_URL:  'เสีนงที่ 2.mp3',                 // เสียงตอน warp (Screen 2)
     SCAN_AUDIO_URL:  'เสียงเอฟเฟคตอนสแกนมือ.mp3',       // เสียงตอนสแกนมือ (Screen 4)
     AUTO_RESET_MS:   0,                            // ms before auto-reset (0 = off)
