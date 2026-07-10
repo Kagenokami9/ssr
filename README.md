@@ -116,3 +116,10 @@ http-server . -p 8080
 GET  /health       → { status, uptime, clients }
 POST /api/trigger  → fires LED effect (fallback)
 ```
+---
+
+# ลิ้งค์เปิดงานสัปดาห์วิทยาศาสตร์ 
+
+```
+ https://kagenokami9.github.io/ssr/
+```
