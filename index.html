@@ -1493,10 +1493,12 @@
     try { el.currentTime = 0; } catch (e) {}
   }
 
-  // "ปลดล็อก" media element ภายใน user gesture: เล่นแล้วหยุดทันที
-  // iOS/มือถือจะจำว่า element นี้ถูกสั่งเล่นใน gesture แล้ว → เล่นอัตโนมัติ (แบบมีเสียง) ทีหลังได้
+  // "ปลดล็อก" media element ภายใน user gesture: เล่นแบบ muted แล้วหยุดทันที
+  // muted กันเสียงวิดีโอหลุดตอนกด Start; iOS จะจำว่า element ถูกสั่งเล่นใน gesture แล้ว
+  // → playIntroVideo() ตั้ง muted=false ตอนเล่นจริงทีหลังได้ (มี fallback muted กันค้าง)
   function primeMedia(el) {
     if (!el) return;
+    el.muted = true;   // prime เงียบ ๆ กันเสียงวิดีโอหลุดตอนกด Start
     const p = el.play();
     if (p && typeof p.then === 'function') {
       p.then(() => { el.pause(); try { el.currentTime = 0; } catch (e) {} })
