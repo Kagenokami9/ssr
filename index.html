@@ -1132,7 +1132,7 @@
     switch (s) {
       case S.WARP:
         runWarp();
-        playSound('warp-audio', CONFIG.WARP_AUDIO_URL);
+        // เสียง warp เล่นใน click handler ของปุ่ม Start (ต้องอยู่ใน user gesture ให้ iOS ยอมเล่น)
         setTimeout(() => {
           stopSound('warp-audio');
           goto(S.SCAN);
@@ -1143,7 +1143,7 @@
       case S.SCANNING:
         restartRings();
         startProgress();
-        playSound('scan-audio', CONFIG.SCAN_AUDIO_URL);
+        // เสียง scan เล่นใน touchstart/mousedown ของ hand-pad (ต้องอยู่ใน user gesture)
         scanCleanup = runScanCanvas();
         setTimeout(async () => {
           if (scanCleanup) scanCleanup();
@@ -1493,6 +1493,17 @@
     try { el.currentTime = 0; } catch (e) {}
   }
 
+  // "ปลดล็อก" media element ภายใน user gesture: เล่นแล้วหยุดทันที
+  // iOS/มือถือจะจำว่า element นี้ถูกสั่งเล่นใน gesture แล้ว → เล่นอัตโนมัติ (แบบมีเสียง) ทีหลังได้
+  function primeMedia(el) {
+    if (!el) return;
+    const p = el.play();
+    if (p && typeof p.then === 'function') {
+      p.then(() => { el.pause(); try { el.currentTime = 0; } catch (e) {} })
+       .catch(() => {}); // กัน error เงียบ ๆ ถ้า browser ยังบล็อค
+    }
+  }
+
   /* ─── Intro video after successful scan ─── */
   function playIntroVideo() {
     const videoScreen = screens[S.VIDEO];
@@ -1503,7 +1514,8 @@
     }
 
     videoScreen.classList.add('loading');
-    video.src = CONFIG.INTRO_VIDEO_URL;
+    // เซ็ต src เฉพาะเมื่อยังไม่ตรง เพื่อไม่ทิ้ง buffer ที่ preload ไว้ตั้งแต่ boot (กันโหลด 20MB ใหม่)
+    if (video.getAttribute('src') !== CONFIG.INTRO_VIDEO_URL) video.src = CONFIG.INTRO_VIDEO_URL;
     video.muted = false;
     video.pause();
     try { video.currentTime = 0; } catch (e) {}
@@ -1644,7 +1656,12 @@
      EVENT LISTENERS
   ============================================================ */
   document.getElementById('btn-start').addEventListener('click', () => {
-    if (state === S.START) goto(S.WARP);
+    if (state !== S.START) return;
+    // เล่นเสียง warp ตรงนี้ (อยู่ใน user gesture → iOS/มือถือยอมเล่นเสียง)
+    playSound('warp-audio', CONFIG.WARP_AUDIO_URL);
+    // ปลดล็อกวิดีโอ intro ภายใน gesture แรก เพื่อให้เล่นแบบมีเสียงได้ตอนสแกนเสร็จ
+    primeMedia(document.getElementById('intro-video'));
+    goto(S.WARP);
   });
  
   const handPad = document.getElementById('hand-pad');
@@ -1652,12 +1669,17 @@
   // Touch – most realistic for iPad
   handPad.addEventListener('touchstart', e => {
     e.preventDefault();
-    if (state === S.SCAN) goto(S.SCANNING);
+    if (state !== S.SCAN) return;
+    // เล่นเสียงสแกนตรงนี้ (อยู่ใน user gesture → iOS ยอมเล่น)
+    playSound('scan-audio', CONFIG.SCAN_AUDIO_URL);
+    goto(S.SCANNING);
   }, { passive: false });
- 
+
   // Mouse fallback for browser testing
   handPad.addEventListener('mousedown', () => {
-    if (state === S.SCAN) goto(S.SCANNING);
+    if (state !== S.SCAN) return;
+    playSound('scan-audio', CONFIG.SCAN_AUDIO_URL);
+    goto(S.SCANNING);
   });
  
   /* ─── แตะที่หน้าจอต้อนรับเพื่อเริ่มใหม่ (ไม่มีปุ่มแล้ว) ─── */
@@ -1680,6 +1702,14 @@
      BOOT
   ============================================================ */
   initWS();
+
+  // Preload วิดีโอ intro ล่วงหน้าตั้งแต่เปิดหน้า (ไฟล์ ~20MB) เพื่อไม่ให้จอดำ/ช้าตอนสแกนเสร็จ
+  // preload="auto" จะเริ่มดาวน์โหลดทันทีที่ src ถูกเซ็ต ระหว่าง user กด Start→warp→สแกน (~11 วิ) จะโหลดเสร็จก่อน
+  (function preloadIntroVideo() {
+    const introVideo = document.getElementById('intro-video');
+    if (introVideo) introVideo.src = CONFIG.INTRO_VIDEO_URL;
+  })();
+
   console.log('[BOOT] Galaxy Gate iPad Interface ready');
   console.log('[BOOT] Config:', CONFIG);
   </script>
