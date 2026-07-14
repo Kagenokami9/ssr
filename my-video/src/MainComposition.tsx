@@ -3,7 +3,7 @@ import { Audio } from "@remotion/media";
 import { TransitionSeries, linearTiming } from "@remotion/transitions";
 import { fade } from "@remotion/transitions/fade";
 import { RobotIntro } from "./scenes/RobotIntro";
-import { MainScene } from "./scenes/MainScene";
+import { AstronautScene } from "./scenes/AstronautScene";
 import { ChemistryScene } from "./scenes/ChemistryScene";
 import { BiologyScene } from "./scenes/BiologyScene";
 import { ComputerScene } from "./scenes/ComputerScene";
@@ -18,7 +18,7 @@ const f = (sec: number) => Math.round(sec * FPS);
 
 // ความยาวแต่ละช่วง (วินาที) — คำนวณเป็นเฟรมจาก FPS ไม่ฮาร์ดโค้ดเลขเฟรม
 const INTRO = f(4); // หุ่นวิ่งชน→ระเบิด
-const VIDEO = f(20); // คลิปนักบินอวกาศ
+const VIDEO = f(7); // ฉากนักบินอวกาศ 3 ช็อต (2.5+2+2.5)
 const CHEMISTRY = f(3);
 const BIOLOGY = f(2.5); // หุ่นยนต์ผ่าตัดอวัยวะ
 const COMPUTER = f(2.5); // หุ่นยนต์เขียนโค้ด โค้ดเด้งออกมา
@@ -47,7 +47,7 @@ export const MainComposition = () => {
         </TransitionSeries.Sequence>
         {fadeTransition}
         <TransitionSeries.Sequence durationInFrames={VIDEO}>
-          <MainScene />
+          <AstronautScene />
         </TransitionSeries.Sequence>
         {fadeTransition}
         <TransitionSeries.Sequence durationInFrames={CHEMISTRY}>

@@ -40,6 +40,18 @@ export const SvgDefs: React.FC = () => (
       <stop offset="55%" stopColor="#dbe6f5" />
       <stop offset="100%" stopColor="#93a6bd" />
     </radialGradient>
+    {/* ชุดสเปซสูท: ขาวนวลด้านบน ไล่เป็นฟ้าเทาด้านล่างให้ดูมีมิติ */}
+    <linearGradient id="astronautSuit" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" stopColor="#ffffff" />
+      <stop offset="55%" stopColor="#e3ecf9" />
+      <stop offset="100%" stopColor="#a9bcd4" />
+    </linearGradient>
+    {/* กระจกหมวก: โทนเข้มเรืองฟ้าตรงกลาง */}
+    <radialGradient id="visorGlow" cx="42%" cy="34%" r="75%">
+      <stop offset="0%" stopColor="#2fb6ff" />
+      <stop offset="45%" stopColor="#153a63" />
+      <stop offset="100%" stopColor="#050b16" />
+    </radialGradient>
     <filter id="smokeBlur" x="-100%" y="-100%" width="300%" height="300%">
       <feGaussianBlur stdDeviation="18" />
     </filter>
@@ -232,6 +244,89 @@ export const Ufo = ({ scale = 1 }: { scale?: number }) => (
     <circle cx={40} cy={4} r={7} fill="#fff29a" />
   </g>
 );
+
+// ============================================================
+// Astronaut — นักบินอวกาศ SVG เวกเตอร์ (วาดที่จุด 0,0 = กลางลำตัว)
+//   props ควบคุมท่าทางให้แต่ละช็อตขยับต่างกัน:
+//   rotation = หมุนทั้งตัว (ตีลังกา), bob = ขยับขึ้นลง (ลอย zero-g)
+//   armLeft/RightAngle = องศาแขน (โบกมือ/กางแขน), legAngle = ถ่างขา
+// ============================================================
+export const Astronaut = ({
+  x,
+  y,
+  scale = 1,
+  rotation = 0,
+  bob = 0,
+  armLeftAngle = 0,
+  armRightAngle = 0,
+  legAngle = 0,
+}: {
+  x: number;
+  y: number;
+  scale?: number;
+  rotation?: number;
+  bob?: number;
+  armLeftAngle?: number;
+  armRightAngle?: number;
+  legAngle?: number;
+}) => {
+  return (
+    <g transform={`translate(${x} ${y + bob}) rotate(${rotation}) scale(${scale})`}>
+      {/* สายเชื่อม (tether) ลอยไปด้านหลัง ให้ดูอยู่ในอวกาศ */}
+      <path
+        d="M 58 -30 C 190 -10 250 130 380 96"
+        fill="none"
+        stroke="#8fb6d8"
+        strokeWidth={5}
+        strokeLinecap="round"
+        opacity={0.45}
+      />
+
+      {/* เป้ถังออกซิเจนด้านหลัง (วาดก่อนลำตัวให้อยู่หลังสุด) */}
+      <rect x={-58} y={-92} width={116} height={150} rx={28} fill="#9fb2c9" />
+      <rect x={-34} y={-78} width={68} height={26} rx={8} fill="#6f8399" opacity={0.7} />
+
+      {/* ขาซ้าย/ขวา (หมุนที่สะโพก ให้ถ่างเข้า-ออกได้) */}
+      <g transform={`rotate(${legAngle} -26 60)`}>
+        <rect x={-40} y={60} width={30} height={108} rx={15} fill="url(#astronautSuit)" stroke="#b9c8dc" strokeWidth={3} />
+        <rect x={-44} y={160} width={40} height={26} rx={10} fill="#5b6b80" />
+      </g>
+      <g transform={`rotate(${-legAngle} 26 60)`}>
+        <rect x={10} y={60} width={30} height={108} rx={15} fill="url(#astronautSuit)" stroke="#b9c8dc" strokeWidth={3} />
+        <rect x={4} y={160} width={40} height={26} rx={10} fill="#5b6b80" />
+      </g>
+
+      {/* ลำตัวชุดสเปซสูท */}
+      <rect x={-60} y={-80} width={120} height={150} rx={44} fill="url(#astronautSuit)" stroke="#c3d2e6" strokeWidth={4} />
+      {/* แผงควบคุมหน้าอก */}
+      <rect x={-32} y={-26} width={64} height={50} rx={12} fill="#14233d" stroke="#3fd2ff" strokeWidth={2} />
+      <circle cx={-14} cy={-8} r={5} fill="#39ff88" />
+      <circle cx={2} cy={-8} r={5} fill="#ffd23f" />
+      <circle cx={18} cy={-8} r={5} fill="#ff5d5d" />
+      <rect x={-22} y={6} width={44} height={6} rx={3} fill="#3fd2ff" opacity={0.8} />
+
+      {/* แขนซ้าย/ขวา (หมุนที่หัวไหล่) */}
+      <g transform={`rotate(${armLeftAngle} -60 -50)`}>
+        <rect x={-92} y={-58} width={30} height={104} rx={15} fill="url(#astronautSuit)" stroke="#b9c8dc" strokeWidth={3} />
+        <circle cx={-77} cy={50} r={17} fill="#eef4ff" stroke="#c3d2e6" strokeWidth={2} />
+      </g>
+      <g transform={`rotate(${armRightAngle} 60 -50)`}>
+        <rect x={62} y={-58} width={30} height={104} rx={15} fill="url(#astronautSuit)" stroke="#b9c8dc" strokeWidth={3} />
+        <circle cx={77} cy={50} r={17} fill="#eef4ff" stroke="#c3d2e6" strokeWidth={2} />
+      </g>
+
+      {/* หมวก + กระจก visor */}
+      <circle cx={0} cy={-148} r={74} fill="url(#astronautSuit)" stroke="#c3d2e6" strokeWidth={4} />
+      <ellipse cx={0} cy={-148} rx={54} ry={48} fill="url(#visorGlow)" />
+      {/* แสงสะท้อนบนกระจก */}
+      <ellipse cx={-18} cy={-166} rx={16} ry={10} fill="#dff3ff" opacity={0.65} transform="rotate(-24 -18 -166)" />
+      <ellipse cx={14} cy={-140} rx={7} ry={20} fill="#8fe9ff" opacity={0.35} transform="rotate(-18 14 -140)" />
+      {/* เสาอากาศเล็ก ๆ */}
+      <line x1={54} y1={-196} x2={70} y2={-224} stroke="#c7d2e0" strokeWidth={4} strokeLinecap="round" />
+      <circle cx={72} cy={-228} r={6} fill="#ff5d5d" />
+    </g>
+  );
+};
 
 // ============================================================
 // SceneStage — เวที SVG มาตรฐาน (พื้นหลังกรมท่า + ดาว + defs) ให้ทุกฉากใช้ร่วม
