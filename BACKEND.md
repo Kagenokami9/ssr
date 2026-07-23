@@ -9,7 +9,7 @@
 
 **Galaxy Gate** คือประสบการณ์อินเทอร์แอกทีฟธีมอวกาศสำหรับ **พิธีเปิดงานสัปดาห์วิทยาศาสตร์**
 
-ผู้ใช้ (เช่น ผู้อำนวยการ) เดินมาที่หน้าจอ → กดปุ่ม **Start** → **วางมือสแกน** → ระบบเล่น **อนิเมชันวาร์ป + สแกน** แล้วจบด้วย **วิดีโออินโทรอวกาศ** → กลับสู่หน้าต้อนรับเพื่อเริ่มรอบใหม่
+ผู้ใช้ (เช่น ผู้อำนวยการ) เดินมาที่ **ทีวีจอสัมผัส** → กดปุ่ม **Start** → **วางมือสแกน** → ระบบเล่น **อนิเมชันวาร์ป + สแกน** แล้วจบด้วย **วิดีโออินโทรอวกาศ** → กลับสู่หน้าต้อนรับเพื่อเริ่มรอบใหม่
 
 ทั้งหมดรันในเบราว์เซอร์ ปัจจุบัน deploy อยู่บน GitHub Pages: `https://kagenokami9.github.io/ssr/`
 
@@ -22,7 +22,7 @@
 
 ```mermaid
 graph TD
-    User([👤 ผู้ใช้ แตะ/สแกนมือ]) --> Index[index.html<br/>iPad Interface + Effects]
+    User([👤 ผู้ใช้ แตะ/สแกนมือ]) --> Index[index.html<br/>ทีวี จอสัมผัส Interface + Effects]
     Index -->|เล่นหลังสแกนเสร็จ| Video[🎬 HelloWorld-v4.mp4<br/>วิดีโออินโทร]
     Index -->|เสียงเอฟเฟกต์| Sound[🔊 sound-1.mp3 warp<br/>🔊 sound-2.mp3 scan]
 
@@ -46,7 +46,7 @@ graph TD
 ```
                         ┌──────────────────────────────┐
    👤 ผู้ใช้ ──แตะ/สแกน──►│        index.html            │
-                        │  (iPad interface + canvas FX)│
+                        │  (ทีวีจอสัมผัส + canvas FX)  │
                         └───────────┬──────────────────┘
                                     │ สแกนเสร็จ
                  ┌──────────────────┼───────────────────┐
@@ -67,7 +67,7 @@ graph TD
 
 | ไฟล์ / โฟลเดอร์ | หน้าที่ | เชื่อมกับอะไร |
 |---|---|---|
-| `index.html` | **หน้าเว็บหลัก** — state machine 6 สถานะ + เอฟเฟกต์ canvas + เล่นเสียง + เล่นวิดีโออินโทร | เรียก `HelloWorld-v4.mp4`, `sound-1/2.mp3`; (เสริม) ยิงสัญญาณไป `websocket-server.js` |
+| `index.html` | **หน้าเว็บหลัก** (แสดงบนทีวีจอสัมผัส) — state machine 6 สถานะ + เอฟเฟกต์ canvas + เล่นเสียง + เล่นวิดีโออินโทร | เรียก `HelloWorld-v4.mp4`, `sound-1/2.mp3`; (เสริม) ยิงสัญญาณไป `websocket-server.js` |
 | `HelloWorld-v4.mp4` | **วิดีโออินโทร** ที่เล่นหลังสแกนเสร็จ (23.5 วิ, มีเสียง) | ถูกอ้างใน `index.html` (`CONFIG.INTRO_VIDEO_URL`) |
 | `HelloWorld-v3.mp4` | วิดีโออินโทร **เวอร์ชันเก่า** (36.5 วิ) — เก็บไว้เฉย ๆ ไม่ได้ใช้แล้ว | — |
 | `my-video/` | **โปรเจกต์ Remotion** (React) ที่ใช้สร้าง/เรนเดอร์วิดีโออินโทร | เรนเดอร์ออกมาเป็น `HelloWorld-v4.mp4` |
@@ -75,7 +75,7 @@ graph TD
 | `sound-1.mp3` | เสียงตอนกด Start / วาร์ป (Screen 2) | `index.html` (`CONFIG.WARP_AUDIO_URL`) |
 | `sound-2.mp3` | เสียงตอนสแกนมือ (Screen 4) | `index.html` (`CONFIG.SCAN_AUDIO_URL`) |
 | `my-video/public/ggd.mp3` | **เพลงประกอบ** ที่ฝังอยู่ในวิดีโออินโทร | ใช้ตอนเรนเดอร์ใน Remotion |
-| `README.md` | คู่มือ setup **เวอร์ชันเก่า** (ดูหมายเหตุข้อ 8) | — |
+| `README.md` | คู่มือ setup (**อัปเดตแล้ว** — ตรงกับระบบปัจจุบัน: index.html ไฟล์เดียว, ใช้ทีวีจอสัมผัส) | — |
 
 ---
 
@@ -122,13 +122,13 @@ stateDiagram-v2
 
 ---
 
-## 5. การเชื่อม iPad ↔ Server ↔ LED (เส้นทางเสริม)
+## 5. การเชื่อม ทีวี ↔ Server ↔ LED (เส้นทางเสริม)
 
-ออกแบบไว้ให้ **หน้าเว็บบน iPad** ยิงสัญญาณไป **server** เมื่อสแกนเสร็จ แล้ว server กระจายต่อไป **จอ LED** ให้เล่นเอฟเฟกต์พร้อมกัน
+ออกแบบไว้ให้ **หน้าเว็บบนทีวีจอสัมผัส** ยิงสัญญาณไป **server** เมื่อสแกนเสร็จ แล้ว server กระจายต่อไป **จอ LED** ให้เล่นเอฟเฟกต์พร้อมกัน
 
 ```
  index.html ──SCAN_COMPLETE──►  websocket-server.js  ──broadcast──►  จอ LED (หลายจอได้)
-   (iPad)      WS :3001 หรือ         (bridge)                         (led display)
+   (ทีวี)      WS :3001 หรือ         (bridge)                         (led display)
                HTTP :3000 fallback
 ```
 
@@ -140,8 +140,8 @@ stateDiagram-v2
 
 | ทิศทาง | type | ความหมาย |
 |---|---|---|
-| Client → Server | `REGISTER` | บอก role ว่าเป็น `ipad` หรือ `led_display` |
-| iPad → Server | `SCAN_COMPLETE` | ทริกเกอร์หลัก — server จะ broadcast ต่อไป LED ทุกจอ |
+| Client → Server | `REGISTER` | บอก role ว่าเป็น `ipad` หรือ `led_display` (ค่า literal `ipad` ในโค้ด = อุปกรณ์ทีวี) |
+| ทีวี → Server | `SCAN_COMPLETE` | ทริกเกอร์หลัก — server จะ broadcast ต่อไป LED ทุกจอ |
 | Server → LED | `SCAN_COMPLETE` | สัญญาณให้จอ LED เล่นเอฟเฟกต์ |
 | Any → Server | `PING` / `PONG` | เช็คการเชื่อมต่อ |
 
@@ -194,7 +194,7 @@ my-video/  (React + Remotion)
 ## 8. สถานะปัจจุบัน / หมายเหตุสำคัญ
 
 - ✅ **`index.html` ทำงานแบบ standalone ได้เลย** (สแกน → เล่นวิดีโอ → วนรอบ) ไม่จำเป็นต้องมี server ก็เล่นได้ เพราะ `DEMO_MODE = true`
-- ⚠️ **`README.md` เดิมล้าสมัย** — อ้างถึงไฟล์ `ipad-interface.html` และ `led-display.html` ซึ่ง **ถูกลบ/รวมเข้า `index.html` ไปแล้ว** ปัจจุบันมีแค่ `index.html` ไฟล์เดียว
+- ✅ **`README.md` อัปเดตให้ตรงความจริงแล้ว** — สะท้อนว่าปัจจุบันมีแค่ `index.html` ไฟล์เดียว (ไฟล์เก่า `ipad-interface.html` / `led-display.html` ถูกรวมเข้าไปแล้ว) และเปลี่ยนอุปกรณ์หน้างานเป็น **ทีวีจอสัมผัส**
 - 🔌 **ถ้าจะใช้จอ LED จริง:** ต้องตั้ง `DEMO_MODE = false`, แก้ `WS_URL`/`LED_API_URL` เป็น IP ของเครื่อง server, รัน `websocket-server.js`, และมีหน้าจอ LED ที่ลงทะเบียน role `led_display` ไว้ (ปัจจุบันยังไม่มีไฟล์หน้า LED ในโฟลเดอร์นี้)
 - 🎬 **ไฟล์วิดีโอ:** ใช้ `HelloWorld-v4.mp4` (ใหม่) — `HelloWorld-v3.mp4` เป็นของเก่าที่เก็บไว้เฉย ๆ
 
